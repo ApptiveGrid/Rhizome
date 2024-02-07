@@ -10,6 +10,9 @@ BaselineOfRhizome >> baseline: spec [
 	spec
 		for: #common
 		do: [ 
+			self 
+				gossip: spec;
+				soil: spec.
 			spec
 				package: 'Rhizome' with: [ spec requires: #('Gossip' 'Soil') ];
 				package: 'Rhizome-Tests' with: [ spec requires: #('Rhizome') ].
