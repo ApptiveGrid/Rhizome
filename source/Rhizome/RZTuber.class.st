@@ -5,7 +5,8 @@ Class {
 		'port',
 		'server',
 		'path',
-		'soil'
+		'soil',
+		'databaseLocator'
 	],
 	#category : #Rhizome
 }
@@ -13,6 +14,9 @@ Class {
 { #category : #running }
 RZTuber >> apiHandler [ 
 	^ RZRestServerDelegate new 
+		rhizome: self;
+		uriSpace: (ZnCallHierarchyRestUriSpace new
+			rootClass: RZTuberRestCall)
 ]
 
 { #category : #running }
@@ -34,6 +38,31 @@ RZTuber >> buildSoil [
 		destroy;
 		initializeFilesystem.
 	
+]
+
+{ #category : #'as yet unclassified' }
+RZTuber >> databaseLocator [
+	^ databaseLocator ifNil: [ 
+		databaseLocator := self defaultDatabaseLocator ]
+]
+
+{ #category : #'as yet unclassified' }
+RZTuber >> databaseWithId: aString [ 
+	path := self databaseLocator pathForId: aString.
+	self halt.
+]
+
+{ #category : #'as yet unclassified' }
+RZTuber >> databaseWithId: aString ifAbsent: aBlock [ 
+	path := self databaseLocator pathForId: aString.
+	^ path exists 
+		ifTrue: [ Soil path: path ]
+		ifFalse: aBlock 
+]
+
+{ #category : #'as yet unclassified' }
+RZTuber >> defaultDatabaseLocator [
+	^ RZSimpleDatabaseLocator new 
 ]
 
 { #category : #accessing }
