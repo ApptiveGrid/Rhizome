@@ -3,7 +3,8 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'address',
-		'port'
+		'port',
+		'primary'
 	],
 	#category : #Rhizome
 }
@@ -37,6 +38,14 @@ RZRemoteReplica >> addressString [
 	^ address printString 
 ]
 
+{ #category : #'as yet unclassified' }
+RZRemoteReplica >> baseUrl [
+	^ ZnUrl new 
+		scheme: #http; 
+		host: address printString; 
+		port: port
+]
+
 { #category : #'instance creation' }
 RZRemoteReplica >> newClient [
 	^ ZnClient new 
@@ -53,6 +62,11 @@ RZRemoteReplica >> port: anInteger [
 	port := anInteger 
 ]
 
+{ #category : #'as yet unclassified' }
+RZRemoteReplica >> primary: aRZSoilReplica [ 
+	primary := aRZSoilReplica 
+]
+
 { #category : #printing }
 RZRemoteReplica >> printOn: aStream [ 
 	aStream << 'remote: ' << address printString << ':' << port printString
@@ -60,9 +74,9 @@ RZRemoteReplica >> printOn: aStream [
 
 { #category : #'as yet unclassified' }
 RZRemoteReplica >> replicateTransactionJournal: aSoilTransactionJournal [ 
-	| client |
-	client := self newClient.
-	client request url: (ZnUrl new scheme: #http; host: address printString; port: port ) / #cluster / #databases / '1111' / #journals.
-	client request entity: (ZnByteArrayEntity bytes: aSoilTransactionJournal soilSerialize).
-   client post 	
+	| response |
+	response := self newClient
+		url: self baseUrl / #cluster / #databases / primary id / #journals;
+		entity: (ZnByteArrayEntity bytes: aSoilTransactionJournal soilSerialize);
+		post 	
 ]

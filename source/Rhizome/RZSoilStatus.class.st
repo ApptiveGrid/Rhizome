@@ -12,6 +12,11 @@ RZSoilStatus >> databaseVersion [
 	^ databaseVersion
 ]
 
+{ #category : #printing }
+RZSoilStatus >> printOn: aStream [ 
+	aStream << 'database version: ' << databaseVersion printString 
+]
+
 { #category : #accessing }
 RZSoilStatus >> soil: aSoil [ 
 	aSoil isOpen ifFalse: [ 

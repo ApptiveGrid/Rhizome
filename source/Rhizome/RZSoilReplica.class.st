@@ -4,8 +4,8 @@ Class {
 	#instVars : [
 		'soil',
 		'state',
-		'group',
-		'notificationHandler'
+		'notificationHandler',
+		'members'
 	],
 	#category : #Rhizome
 }
@@ -36,8 +36,19 @@ RZSoilReplica >> endpointStatusAt: aReplica [
 ]
 
 { #category : #accessing }
-RZSoilReplica >> group: aCollection [ 
-	group := aCollection
+RZSoilReplica >> id [
+	^ soil path basename
+]
+
+{ #category : #accessing }
+RZSoilReplica >> memberAddresses: aCollection [ 
+	members := aCollection do: [ :each |
+		each primary: self  ]
+]
+
+{ #category : #accessing }
+RZSoilReplica >> members: aCollection [ 
+	members := aCollection
 ]
 
 { #category : #'instance creation' }
@@ -53,9 +64,9 @@ RZSoilReplica >> notificationHandler [
 ]
 
 { #category : #'as yet unclassified' }
-RZSoilReplica >> replicateTransactionJournal: aSoilTransactionJournal [ 
-	group do: [ :member | 
-		member replicateTransactionJournal: aSoilTransactionJournal ]
+RZSoilReplica >> replicateTransactionJournal: aSoilTransactionJournal [
+	members do: [ :member | 
+		member replicateTransactionJournal: aSoilTransactionJournal] 
 ]
 
 { #category : #accessing }
@@ -67,7 +78,7 @@ RZSoilReplica >> soil: aSoil [
 { #category : #accessing }
 RZSoilReplica >> start [
 	| memberStatus |
-	memberStatus := (group collect: [ :each | 
+	memberStatus := (members collect: [ :each | 
 		each -> (self endpointStatusAt: each)  ]) asDictionary.
 	memberStatus keysAndValuesDo: [ :remote :status |
 		status 
@@ -83,6 +94,13 @@ RZSoilReplica >> start [
 { #category : #accessing }
 RZSoilReplica >> stop [
 	soil close 
+]
+
+{ #category : #'as yet unclassified' }
+RZSoilReplica >> syncTransactionJournalsFrom: from to: to [ 
+	(from + 1 to: to) do: [ :index |
+		self replicateTransactionJournal: (soil journal transactionJournalAt: index) ]
+	
 ]
 
 { #category : #'as yet unclassified' }
