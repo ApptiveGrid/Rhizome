@@ -5,6 +5,11 @@ Class {
 }
 
 { #category : #accessing }
+RZRestCall class >> pattern [
+	^ #( #none )
+]
+
+{ #category : #accessing }
 RZRestCall >> endpoint [
 	^ delegate endpoint
 ]

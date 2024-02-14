@@ -9,7 +9,8 @@ Class {
 
 { #category : #'private - protocol' }
 RZSoilReplicateVisitor >> sendCommand: aCommand [ 
-	socket sendMessage: aCommand serialize
+	socket sendMessage: aCommand serialize.
+	^ STON fromString: socket readMessage
 ]
 
 { #category : #accessing }
@@ -20,10 +21,11 @@ RZSoilReplicateVisitor >> socket: aZnWebSocket [
 { #category : #api }
 RZSoilReplicateVisitor >> traverse [
 	| response |
-	response := self sendCommand: (RZInitializeDatabase new id: soil path basename).
-	self halt.
-	super traverse: soil.
-	self halt.
+	response := self sendCommand: (RZInitializeDatabase new 
+		id: soil path basename;
+		databaseVersion: soil databaseVersion).
+	response isSuccess ifFalse: [ Error signal: 'nope' ].
+	super traverse: soil
 ]
 
 { #category : #api }
@@ -61,7 +63,6 @@ RZSoilReplicateVisitor >> visitPersistentClusterVersion: aSoilPersistentClusterV
 	self sendCommand: (RZWriteCluster new 
 		objectId: aSoilPersistentClusterVersion objectId;
 		cluster: (ByteArray streamContents: [:stream |
-			aSoilPersistentClusterVersion objectId writeOn: stream.  
 			stream nextPutAll: backupCluster serialize ])).
 	backupCluster references do: [ :reference |
 		self visit: reference ].

@@ -8,6 +8,11 @@ Class {
 }
 
 { #category : #accessing }
+RZSoilStatus >> databaseVersion [
+	^ databaseVersion
+]
+
+{ #category : #accessing }
 RZSoilStatus >> soil: aSoil [ 
 	aSoil isOpen ifFalse: [ 
 		aSoil open ].

@@ -12,7 +12,7 @@ Class {
 
 { #category : #accessing }
 RZSoilReplica >> databaseId [
-	^ #'4321'
+	^ soil path basename
 ]
 
 { #category : #'as yet unclassified' }
@@ -43,12 +43,19 @@ RZSoilReplica >> group: aCollection [
 { #category : #'instance creation' }
 RZSoilReplica >> newNotificationHandler [
 	^ RZNotificationHandler new
+		replica: self 
 ]
 
 { #category : #accessing }
 RZSoilReplica >> notificationHandler [
 	^ notificationHandler ifNil: [ 
 		notificationHandler := self newNotificationHandler ]
+]
+
+{ #category : #'as yet unclassified' }
+RZSoilReplica >> replicateTransactionJournal: aSoilTransactionJournal [ 
+	group do: [ :member | 
+		member replicateTransactionJournal: aSoilTransactionJournal ]
 ]
 
 { #category : #accessing }
@@ -66,7 +73,9 @@ RZSoilReplica >> start [
 		status 
 			ifNotNil: [ 
 				(soil databaseVersion = status databaseVersion) ifFalse: [ 
-					self halt ]  ]
+					(soil databaseVersion > status databaseVersion)
+						ifTrue: [ self syncTransactionJournalsFrom: status databaseVersion to: soil databaseVersion ]
+						ifFalse: [ Error signal: 'replica is newer' ] ] ]
 			ifNil: [ self doInitialSync: remote ]
 		 ]
 ]

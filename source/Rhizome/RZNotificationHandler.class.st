@@ -2,12 +2,18 @@ Class {
 	#name : #RZNotificationHandler,
 	#superclass : #SoilNotificationHandler,
 	#instVars : [
-		'endpoint'
+		'endpoint',
+		'replica'
 	],
 	#category : #Rhizome
 }
 
+{ #category : #'as yet unclassified' }
+RZNotificationHandler >> replica: aRZSoilReplica [ 
+	replica := aRZSoilReplica 
+]
+
 { #category : #counting }
 RZNotificationHandler >> transactionCommitted: txn [ 
-	self halt.
+	replica replicateTransactionJournal: txn journal 
 ]

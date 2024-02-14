@@ -2,14 +2,37 @@ Class {
 	#name : #RZInitializeDatabase,
 	#superclass : #RZStringCommand,
 	#instVars : [
-		'id'
+		'id',
+		'databaseVersion'
 	],
 	#category : #Rhizome
 }
 
+{ #category : #accessing }
+RZInitializeDatabase >> databaseVersion [
+
+	^ databaseVersion
+]
+
+{ #category : #accessing }
+RZInitializeDatabase >> databaseVersion: anObject [
+
+	databaseVersion := anObject
+]
+
 { #category : #'as yet unclassified' }
 RZInitializeDatabase >> executeIn: aHandler [ 
-	aHandler database: (aHandler endpoint createDatabaseWithId: id) 
+	| database |
+	database := (aHandler endpoint createDatabaseWithId: id).
+	aHandler database: database.
+	database databaseVersion: databaseVersion.
+	^ RZSuccess new
+]
+
+{ #category : #accessing }
+RZInitializeDatabase >> id [
+
+	^ id
 ]
 
 { #category : #accessing }
