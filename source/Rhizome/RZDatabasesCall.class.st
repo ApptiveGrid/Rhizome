@@ -1,6 +1,6 @@
 Class {
 	#name : #RZDatabasesCall,
-	#superclass : #RZTuberRestCall,
+	#superclass : #RZRestCall,
 	#category : #Rhizome
 }
 
@@ -12,10 +12,12 @@ RZDatabasesCall class >> pattern [
 { #category : #public }
 RZDatabasesCall >> get [ 
 	| db |
-	db := self rhizome 
+	db := self endpoint
 		databaseWithId: request url pathSegments second
 		ifAbsent: [
 			response :=  ZnResponse notFound: request url.
 			^ self  ].
-	response := ZnResponse ok: db printString
+	response := ZnResponse ok: (ZnEntity 
+		with: (STON toString: (RZSoilStatus new soil: db))
+		type: (ZnMimeType main: 'text' sub: 'ston'))
 ]

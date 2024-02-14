@@ -1,0 +1,19 @@
+Class {
+	#name : #RZChangeState,
+	#superclass : #RZStringCommand,
+	#instVars : [
+		'state'
+	],
+	#category : #Rhizome
+}
+
+{ #category : #'accessing - structure variables' }
+RZChangeState class >> state: aState [
+	^ self new 
+		state: aState
+]
+
+{ #category : #'accessing - structure variables' }
+RZChangeState >> state: aState [ 
+	state := aState 
+]

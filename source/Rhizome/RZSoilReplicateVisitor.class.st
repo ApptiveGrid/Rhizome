@@ -1,26 +1,37 @@
 Class {
 	#name : #RZSoilReplicateVisitor,
-	#superclass : #SoilBackupVisitor,
+	#superclass : #SoilInstanceVisitor,
 	#instVars : [
 		'socket'
 	],
 	#category : #Rhizome
 }
 
-{ #category : #api }
-RZSoilReplicateVisitor >> backup: aSoil [ 
-	| objectId |
-	source := aSoil.
-	self visit: source.
-	
-	[ toBeProcessed isEmpty ] whileFalse: [  
-		objectId := toBeProcessed  removeFirst.
-		self visit: (source objectRepository at: objectId) ]
+{ #category : #'private - protocol' }
+RZSoilReplicateVisitor >> sendCommand: aCommand [ 
+	socket sendMessage: aCommand serialize
 ]
 
 { #category : #accessing }
 RZSoilReplicateVisitor >> socket: aZnWebSocket [ 
 	socket := aZnWebSocket
+]
+
+{ #category : #api }
+RZSoilReplicateVisitor >> traverse [
+	| response |
+	response := self sendCommand: (RZInitializeDatabase new id: soil path basename).
+	self halt.
+	super traverse: soil.
+	self halt.
+]
+
+{ #category : #api }
+RZSoilReplicateVisitor >> traverse: aSoil [ 
+	| response |
+	response := self sendCommand: (RZInitializeDatabase new id: soil id).
+	super traverse: aSoil.
+	self halt.
 ]
 
 { #category : #visiting }
@@ -47,13 +58,15 @@ RZSoilReplicateVisitor >> visitPersistentClusterVersion: aSoilPersistentClusterV
 		bytes: aSoilPersistentClusterVersion bytes;
 		version: aSoilPersistentClusterVersion version;
 		resetPreviousVersion.
-	socket sendMessage: (ByteArray streamContents: [:stream |
-		aSoilPersistentClusterVersion objectId writeOn: stream.  
-		stream nextPutAll: backupCluster serialize ]).
+	self sendCommand: (RZWriteCluster new 
+		objectId: aSoilPersistentClusterVersion objectId;
+		cluster: (ByteArray streamContents: [:stream |
+			aSoilPersistentClusterVersion objectId writeOn: stream.  
+			stream nextPutAll: backupCluster serialize ])).
 	backupCluster references do: [ :reference |
-		self process: reference ].
+		self visit: reference ].
 	aSoilPersistentClusterVersion indexIds do:[ :indexId |
-		self copyIndexAt: indexId segment: aSoilPersistentClusterVersion segment ].
+		self processIndexId: indexId segment: aSoilPersistentClusterVersion segment ].
 
 	^ aSoilPersistentClusterVersion 
 ]

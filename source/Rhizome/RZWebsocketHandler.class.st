@@ -2,26 +2,43 @@ Class {
 	#name : #RZWebsocketHandler,
 	#superclass : #Object,
 	#instVars : [
-		'continent'
+		'endpoint',
+		'database'
 	],
 	#category : #Rhizome
 }
 
+{ #category : #accessing }
+RZWebsocketHandler >> database [
+	^ database
+]
+
+{ #category : #accessing }
+RZWebsocketHandler >> database: aSoil [ 
+	database := aSoil
+]
+
+{ #category : #accessing }
+RZWebsocketHandler >> databaseId: aString [ 
+	database := endpoint databaseWithId: aString ifAbsent: [ Error signal: 'nope' ] 
+]
+
+{ #category : #accessing }
+RZWebsocketHandler >> endpoint [
+	^ endpoint
+]
+
 { #category : #'as yet unclassified' }
-RZWebsocketHandler >> continent: aContinent [ 
-	continent := aContinent 
+RZWebsocketHandler >> endpoint: anEndpoint [
+	endpoint := anEndpoint 
 ]
 
 { #category : #accessing }
 RZWebsocketHandler >> handleMessage: message [
-	| record stream objectId |
-	Transcript show: 'handleMessage: '; cr.
-	stream := message readStream.
-	objectId := SoilObjectId readFrom: stream.
-	"record := SoilPersistentClusterVersion readFrom: stream."
-	Transcript show: 'storing bytes for ', objectId printString; cr.
-	self soil objectRepository at: objectId put: stream upToEnd.
-	^ 'OK'
+	| command |
+	command := message materialize.
+	command executeIn: self.
+	^ STON toString: RZSuccess new
 ]
 
 { #category : #public }
@@ -32,7 +49,7 @@ RZWebsocketHandler >> handleRequest: aZnRequest [
 
 { #category : #accessing }
 RZWebsocketHandler >> soil [
-	^ continent soil
+	^ endpoint soil
 ]
 
 { #category : #accessing }
