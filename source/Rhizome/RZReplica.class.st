@@ -1,30 +1,31 @@
 Class {
-	#name : #RZSoilReplica,
+	#name : #RZReplica,
 	#superclass : #Object,
 	#instVars : [
 		'soil',
 		'state',
 		'notificationHandler',
-		'members'
+		'members',
+		'virtualNode'
 	],
 	#category : #Rhizome
 }
 
 { #category : #accessing }
-RZSoilReplica >> databaseId [
+RZReplica >> databaseId [
 	^ soil path basename
 ]
 
 { #category : #'as yet unclassified' }
-RZSoilReplica >> doInitialSync: remote [
+RZReplica >> doInitialSync: remote [
 	RZSoilReplicateVisitor new 
 		socket: (ZnWebSocket to: 'ws://', remote addressString ,':', remote port asString ,'/ws');
 		soil: soil;
-		traverse
+		traverse 
 ]
 
 { #category : #accessing }
-RZSoilReplica >> endpointStatusAt: aReplica [ 
+RZReplica >> endpointStatusAt: aReplica [ 
 	| response |
 	response := ZnClient new 
 		url: (ZnUrl new host: aReplica address printString; port: aReplica port) / #cluster / #databases / self databaseId;
@@ -36,47 +37,42 @@ RZSoilReplica >> endpointStatusAt: aReplica [
 ]
 
 { #category : #accessing }
-RZSoilReplica >> id [
+RZReplica >> id [
 	^ soil path basename
 ]
 
-{ #category : #accessing }
-RZSoilReplica >> memberAddresses: aCollection [ 
-	members := aCollection do: [ :each |
-		each primary: self  ]
-]
-
-{ #category : #accessing }
-RZSoilReplica >> members: aCollection [ 
-	members := aCollection
-]
-
 { #category : #'instance creation' }
-RZSoilReplica >> newNotificationHandler [
+RZReplica >> newNotificationHandler [
 	^ RZNotificationHandler new
 		replica: self 
 ]
 
 { #category : #accessing }
-RZSoilReplica >> notificationHandler [
+RZReplica >> notificationHandler [
 	^ notificationHandler ifNil: [ 
 		notificationHandler := self newNotificationHandler ]
 ]
 
+{ #category : #printing }
+RZReplica >> printOn: aStream [ 
+	aStream << 'replica on '.
+	virtualNode printOn: aStream 
+]
+
 { #category : #'as yet unclassified' }
-RZSoilReplica >> replicateTransactionJournal: aSoilTransactionJournal [
+RZReplica >> replicateTransactionJournal: aSoilTransactionJournal [
 	members do: [ :member | 
 		member replicateTransactionJournal: aSoilTransactionJournal] 
 ]
 
 { #category : #accessing }
-RZSoilReplica >> soil: aSoil [ 
+RZReplica >> soil: aSoil [ 
 	soil := aSoil.
 	soil notificationHandler: self notificationHandler
 ]
 
 { #category : #accessing }
-RZSoilReplica >> start [
+RZReplica >> start [
 	| memberStatus |
 	memberStatus := (members collect: [ :each | 
 		each -> (self endpointStatusAt: each)  ]) asDictionary.
@@ -92,18 +88,28 @@ RZSoilReplica >> start [
 ]
 
 { #category : #accessing }
-RZSoilReplica >> stop [
+RZReplica >> stop [
 	soil close 
 ]
 
 { #category : #'as yet unclassified' }
-RZSoilReplica >> syncTransactionJournalsFrom: from to: to [ 
+RZReplica >> syncTransactionJournalsFrom: from to: to [ 
 	(from + 1 to: to) do: [ :index |
 		self replicateTransactionJournal: (soil journal transactionJournalAt: index) ]
 	
 ]
 
 { #category : #'as yet unclassified' }
-RZSoilReplica >> transactionCreated: aSoilTransaction [ 
+RZReplica >> transactionCreated: aSoilTransaction [ 
 	
+]
+
+{ #category : #accessing }
+RZReplica >> virtualNode: aRZVirtualNode [ 
+	virtualNode := aRZVirtualNode 
+]
+
+{ #category : #'as yet unclassified' }
+RZReplica >> virtualNode: aRZLocalNode resolveVirtualNodeForKey: aString [ 
+	self shouldBeImplemented.
 ]

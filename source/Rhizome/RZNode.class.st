@@ -2,9 +2,10 @@ Class {
 	#name : #RZNode,
 	#superclass : #Object,
 	#instVars : [
-		'address',
 		'name',
-		'virtualNodes'
+		'address',
+		'virtualNodes',
+		'cluster'
 	],
 	#category : #Rhizome
 }
@@ -28,6 +29,11 @@ RZNode >> addVirtualNode: aRZImage [
 	virtualNodes add: aRZImage 
 ]
 
+{ #category : #adding }
+RZNode >> addVirtualNodeWithPort: anInteger [ 
+	self addVirtualNode: (self virtualNodeClass port: anInteger)
+]
+
 { #category : #accessing }
 RZNode >> address [
 	^ address
@@ -36,6 +42,11 @@ RZNode >> address [
 { #category : #accessing }
 RZNode >> address: aString [ 
 	address := aString
+]
+
+{ #category : #accessing }
+RZNode >> cluster: aRZCluster [ 
+	cluster := aRZCluster
 ]
 
 { #category : #testing }
@@ -69,6 +80,26 @@ RZNode >> printOn: aStream [
 	aStream <<  name asString << '['.
 	address printOn: aStream.
 	aStream << ']'
+]
+
+{ #category : #'as yet unclassified' }
+RZNode >> resolveNodeForKey: aString [ 
+	^ cluster nodeNameForKey: aString 
+]
+
+{ #category : #'as yet unclassified' }
+RZNode >> resolveVirtualNodeForKey: aString [ 
+	^ virtualNodes anyOne
+]
+
+{ #category : #adding }
+RZNode >> virtualNodeClass [
+	^ RZVirtualNode
+]
+
+{ #category : #'as yet unclassified' }
+RZNode >> virtualNodeWithPort: anInteger [ 
+	^ virtualNodes detect: [ :vnode | vnode port = anInteger ]
 ]
 
 { #category : #accessing }
