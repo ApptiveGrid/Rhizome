@@ -2,7 +2,9 @@ Class {
 	#name : #RZReplicaSet,
 	#superclass : #Object,
 	#instVars : [
-		'replicas'
+		'key',
+		'replicas',
+		'cluster'
 	],
 	#category : #Rhizome
 }
@@ -13,10 +15,15 @@ RZReplicaSet >> addReplica: aRZReplica [
 ]
 
 { #category : #accessing }
+RZReplicaSet >> cluster: aRZCluster [ 
+	cluster := aRZCluster
+]
+
+{ #category : #accessing }
 RZReplicaSet >> endpointStatusAt: aReplica [ 
 	| response |
 	response := ZnClient new 
-		url: (ZnUrl new host: aReplica address printString; port: aReplica port) / #cluster / #databases / self databaseId;
+		url: (ZnUrl new host: aReplica address; port: aReplica port) / #cluster / #databases / key;
 		get;
 		response.
 	^ response isSuccess 
@@ -28,6 +35,23 @@ RZReplicaSet >> endpointStatusAt: aReplica [
 RZReplicaSet >> initialize [ 
 	super initialize.
 	replicas := OrderedCollection new
+]
+
+{ #category : #accessing }
+RZReplicaSet >> key [
+
+	^ key
+]
+
+{ #category : #accessing }
+RZReplicaSet >> key: anObject [
+
+	key := anObject
+]
+
+{ #category : #'as yet unclassified' }
+RZReplicaSet >> remoteReplicas [
+	^ replicas reject: [ :each | each node = cluster localNode ]
 ]
 
 { #category : #accessing }

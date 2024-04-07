@@ -104,7 +104,7 @@ RZCluster >> placementStrategy [
 { #category : #'as yet unclassified' }
 RZCluster >> replicaSetForKey: aString [ 
 	| replicaSet |
-	replicaSet := RZReplicaSet new.
+	replicaSet := RZReplicaSet new key: aString; cluster: self.
 	(self placementStrategy nodeNamesForKey: aString) do: [ :name |
 		replicaSet addReplica: (RZReplica new 
 			virtualNode: ((self nodeWithName: name) resolveVirtualNodeForKey: aString) ) ].
