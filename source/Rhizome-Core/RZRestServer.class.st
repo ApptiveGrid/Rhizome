@@ -7,7 +7,7 @@ Class {
 		'address',
 		'endpoint'
 	],
-	#category : #Rhizome
+	#category : #'Rhizome-Core-Rhizome-Core'
 }
 
 { #category : #accessing }

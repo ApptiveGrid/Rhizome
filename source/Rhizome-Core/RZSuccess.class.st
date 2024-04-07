@@ -1,7 +1,7 @@
 Class {
 	#name : #RZSuccess,
 	#superclass : #RZResponse,
-	#category : #Rhizome
+	#category : #'Rhizome-Core-Rhizome-Core'
 }
 
 { #category : #testing }

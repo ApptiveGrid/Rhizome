@@ -6,7 +6,7 @@ Class {
 		'nodes',
 		'placementStrategy'
 	],
-	#category : #Rhizome
+	#category : #'Rhizome-Core-Rhizome-Core'
 }
 
 { #category : #adding }

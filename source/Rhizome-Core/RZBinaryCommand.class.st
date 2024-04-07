@@ -1,7 +1,7 @@
 Class {
 	#name : #RZBinaryCommand,
 	#superclass : #RZCommand,
-	#category : #Rhizome
+	#category : #'Rhizome-Core-Rhizome-Core'
 }
 
 { #category : #'instance creation' }

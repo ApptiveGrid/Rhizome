@@ -1,5 +1,5 @@
 Class {
 	#name : #RZCommand,
 	#superclass : #Object,
-	#category : #Rhizome
+	#category : #'Rhizome-Core-Rhizome-Core'
 }

@@ -7,7 +7,7 @@ Class {
 		'cluster',
 		'databaseLocator'
 	],
-	#category : #Rhizome
+	#category : #'Rhizome-Core-Rhizome-Core'
 }
 
 { #category : #accessing }

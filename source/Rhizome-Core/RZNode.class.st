@@ -7,7 +7,7 @@ Class {
 		'virtualNodes',
 		'cluster'
 	],
-	#category : #Rhizome
+	#category : #'Rhizome-Core-Rhizome-Core'
 }
 
 { #category : #accessing }

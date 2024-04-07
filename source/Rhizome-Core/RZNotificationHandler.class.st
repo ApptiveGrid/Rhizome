@@ -5,7 +5,7 @@ Class {
 		'endpoint',
 		'replica'
 	],
-	#category : #Rhizome
+	#category : #'Rhizome-Core-Rhizome-Core'
 }
 
 { #category : #'as yet unclassified' }

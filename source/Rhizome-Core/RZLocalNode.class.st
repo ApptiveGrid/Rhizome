@@ -4,5 +4,5 @@ Class {
 	#instVars : [
 		'path'
 	],
-	#category : #Rhizome
+	#category : #'Rhizome-Core-Rhizome-Core'
 }

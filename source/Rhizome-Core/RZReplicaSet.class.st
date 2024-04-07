@@ -6,7 +6,7 @@ Class {
 		'replicas',
 		'cluster'
 	],
-	#category : #Rhizome
+	#category : #'Rhizome-Core-Rhizome-Core'
 }
 
 { #category : #adding }

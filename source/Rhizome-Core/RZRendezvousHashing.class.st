@@ -5,7 +5,7 @@ Class {
 		'nodes',
 		'prefix'
 	],
-	#category : #Rhizome
+	#category : #'Rhizome-Core-Rhizome-Core'
 }
 
 { #category : #accessing }

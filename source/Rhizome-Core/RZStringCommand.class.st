@@ -1,7 +1,7 @@
 Class {
 	#name : #RZStringCommand,
 	#superclass : #RZCommand,
-	#category : #Rhizome
+	#category : #'Rhizome-Core-Rhizome-Core'
 }
 
 { #category : #serializing }

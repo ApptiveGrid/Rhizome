@@ -7,7 +7,7 @@ Class {
 		'notificationHandler',
 		'virtualNode'
 	],
-	#category : #Rhizome
+	#category : #'Rhizome-Core-Rhizome-Core'
 }
 
 { #category : #accessing }

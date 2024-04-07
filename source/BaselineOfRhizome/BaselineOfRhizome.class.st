@@ -15,12 +15,12 @@ BaselineOfRhizome >> baseline: spec [
 				soil: spec;
 				zinc: spec.
 			spec
-				package: 'Rhizome' with: [ spec requires: #('Gossip' 'Soil' 'ZincHTTPComponents') ];
+				package: 'Rhizome-Core' with: [ spec requires: #('Gossip' 'Soil' 'ZincHTTPComponents') ];
 				package: 'Rhizome-Tests' with: [ spec requires: #('Rhizome') ].
 
 			spec
 				group: 'default' with: #('Core');
-				group: 'Core' with: #('Rhizome' 'Rhizome-Tests') ].
+				group: 'Core' with: #('Rhizome-Core' 'Rhizome-Tests') ].
 ]
 
 { #category : #'as yet unclassified' }

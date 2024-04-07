@@ -1,5 +1,5 @@
 Class {
 	#name : #RZReplicaState,
 	#superclass : #Object,
-	#category : #Rhizome
+	#category : #'Rhizome-Core-Rhizome-Core'
 }

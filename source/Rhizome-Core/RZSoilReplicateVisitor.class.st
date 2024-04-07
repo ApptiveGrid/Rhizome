@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'socket'
 	],
-	#category : #Rhizome
+	#category : #'Rhizome-Core-Rhizome-Core'
 }
 
 { #category : #'private - protocol' }
