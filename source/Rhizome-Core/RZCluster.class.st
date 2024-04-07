@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'localAddress',
 		'nodes',
-		'placementStrategy'
+		'placementStrategy',
+		'network'
 	],
 	#category : #'Rhizome-Core-Rhizome-Core'
 }
@@ -13,6 +14,12 @@ Class {
 RZCluster >> addNode: aRZNode [ 
 	aRZNode cluster: self.
 	nodes add: aRZNode 
+]
+
+{ #category : #'as yet unclassified' }
+RZCluster >> announceAll [
+	self remoteNodes do: [ :node | 
+		network announce: self localVirtualNode to: node address  ]
 ]
 
 { #category : #'as yet unclassified' }
@@ -42,6 +49,23 @@ RZCluster >> localAddress: aString [
 { #category : #'as yet unclassified' }
 RZCluster >> localNode [
 	^ self nodeWithAddress: localAddress 
+]
+
+{ #category : #'as yet unclassified' }
+RZCluster >> localVirtualNode [
+	^ self localNode localVirtualNode 
+]
+
+{ #category : #accessing }
+RZCluster >> network [
+	^ network ifNil: [ 
+		network := self realNetwork ]
+]
+
+{ #category : #accessing }
+RZCluster >> network: anObject [
+
+	network := anObject
 ]
 
 { #category : #'as yet unclassified' }
@@ -102,11 +126,20 @@ RZCluster >> placementStrategy [
 ]
 
 { #category : #'as yet unclassified' }
+RZCluster >> remoteNodes [
+	^ nodes copyWithout: self localNode 
+]
+
+{ #category : #'as yet unclassified' }
 RZCluster >> replicaSetForKey: aString [ 
 	| replicaSet |
 	replicaSet := RZReplicaSet new key: aString; cluster: self.
-	(self placementStrategy nodeNamesForKey: aString) do: [ :name |
-		replicaSet addReplica: (RZReplica new 
+	(self placementStrategy nodeNamesForKey: aString) do: [ :name | | replica |
+		replica := (name = self localNode name)
+			ifTrue: [ RZLocalReplica new ]
+			ifFalse: [ RZRemoteReplica new ].
+		replicaSet addReplica: (replica
+			replicaSet: replicaSet;
 			virtualNode: ((self nodeWithName: name) resolveVirtualNodeForKey: aString) ) ].
 	^ replicaSet 
 ]

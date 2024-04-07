@@ -21,5 +21,5 @@ RZSoilStatus >> printOn: aStream [
 RZSoilStatus >> soil: aSoil [ 
 	aSoil isOpen ifFalse: [ 
 		aSoil open ].
-	databaseVersion := aSoil databaseVersion
+	databaseVersion := aSoil control databaseVersion
 ]

@@ -45,6 +45,11 @@ RZNode >> address: aString [
 ]
 
 { #category : #accessing }
+RZNode >> cluster [
+	^ cluster
+]
+
+{ #category : #accessing }
 RZNode >> cluster: aRZCluster [ 
 	cluster := aRZCluster
 ]
@@ -58,6 +63,11 @@ RZNode >> hasName: aString [
 RZNode >> initialize [ 
 	super initialize.
 	virtualNodes := OrderedCollection new
+]
+
+{ #category : #testing }
+RZNode >> isLocalNode [
+	^ false
 ]
 
 { #category : #accessing }
@@ -75,6 +85,11 @@ RZNode >> port [
 	self shouldBeImplemented.
 ]
 
+{ #category : #accessing }
+RZNode >> portAt: aNumber [ 
+	^ virtualNodes detect: [ :each | each port = aNumber  ]
+]
+
 { #category : #printing }
 RZNode >> printOn: aStream [ 
 	aStream <<  name asString << '['.
@@ -89,6 +104,7 @@ RZNode >> resolveNodeForKey: aString [
 
 { #category : #'as yet unclassified' }
 RZNode >> resolveVirtualNodeForKey: aString [ 
+	virtualNodes ifEmpty: [ Error signal: 'node ', name , ' has no virtual nodes' ].
 	^ virtualNodes anyOne
 ]
 

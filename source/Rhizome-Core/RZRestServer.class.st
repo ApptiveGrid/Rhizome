@@ -5,7 +5,7 @@ Class {
 		'port',
 		'server',
 		'address',
-		'endpoint'
+		'node'
 	],
 	#category : #'Rhizome-Core-Rhizome-Core'
 }
@@ -18,7 +18,7 @@ RZRestServer >> address: aString [
 { #category : #running }
 RZRestServer >> apiHandler [ 
 	^ RZRestServerDelegate new 
-		endpoint: self endpoint;
+		node: self node;
 		uriSpace: (ZnCallHierarchyRestUriSpace new
 			rootClass: RZRestCall)
 ]
@@ -41,17 +41,6 @@ RZRestServer >> defaultPort [
 	^ 4850
 ]
 
-{ #category : #accessing }
-RZRestServer >> endpoint [
-	^ endpoint  
-]
-
-{ #category : #accessing }
-RZRestServer >> endpoint: anObject [
-
-	endpoint := anObject
-]
-
 { #category : #running }
 RZRestServer >> handler [ 
 	| handler |
@@ -69,6 +58,18 @@ RZRestServer >> handler [
 	
 	^ handler
 	
+]
+
+{ #category : #accessing }
+RZRestServer >> node [
+
+	^ node
+]
+
+{ #category : #accessing }
+RZRestServer >> node: anObject [
+
+	node := anObject
 ]
 
 { #category : #accessing }
@@ -98,5 +99,5 @@ RZRestServer >> stop [
 
 { #category : #running }
 RZRestServer >> websocketHandler [
-	^ ZnWebSocketDelegate handler: (RZWebsocketHandler new endpoint: self endpoint)
+	^ ZnWebSocketDelegate handler: (RZWebsocketHandler new node: self node)
 ]

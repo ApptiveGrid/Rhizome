@@ -2,17 +2,19 @@ Class {
 	#name : #RZRestServerDelegate,
 	#superclass : #ZnJSONRestServerDelegate,
 	#instVars : [
-		'endpoint'
+		'node'
 	],
 	#category : #'Rhizome-Core-Rhizome-Core'
 }
 
 { #category : #accessing }
-RZRestServerDelegate >> endpoint [
-	^ endpoint
+RZRestServerDelegate >> node [
+
+	^ node
 ]
 
 { #category : #accessing }
-RZRestServerDelegate >> endpoint: aRZEndpoint [ 
-	endpoint := aRZEndpoint
+RZRestServerDelegate >> node: anObject [
+
+	node := anObject
 ]

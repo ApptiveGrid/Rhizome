@@ -22,7 +22,8 @@ RZReplicaSet >> cluster: aRZCluster [
 { #category : #accessing }
 RZReplicaSet >> endpointStatusAt: aReplica [ 
 	| response |
-	response := ZnClient new 
+	
+	response := cluster network newHttpClient
 		url: (ZnUrl new host: aReplica address; port: aReplica port) / #cluster / #databases / key;
 		get;
 		response.
@@ -50,8 +51,18 @@ RZReplicaSet >> key: anObject [
 ]
 
 { #category : #'as yet unclassified' }
+RZReplicaSet >> localReplica [
+	^ replicas detect: [ :replica | replica node = cluster localNode ]
+]
+
+{ #category : #'as yet unclassified' }
 RZReplicaSet >> remoteReplicas [
 	^ replicas reject: [ :each | each node = cluster localNode ]
+]
+
+{ #category : #accessing }
+RZReplicaSet >> replicas [
+	^ replicas
 ]
 
 { #category : #accessing }
@@ -76,9 +87,10 @@ RZReplicaSet >> start [
 				(self localReplica databaseVersion = status databaseVersion) ifFalse: [ 
 					(self localReplica databaseVersion > status databaseVersion)
 						ifTrue: [ 
-								self 
+								self localReplica 
 									syncTransactionJournalsFrom: status databaseVersion 
-									to: self localReplica databaseVersion ]
+									to: self localReplica databaseVersion
+									target: remote  ]
 						ifFalse: [ Error signal: 'replica is newer' ] ] ]
 			ifNil: [ self localReplica doInitialSync: remote ]
 		 ]

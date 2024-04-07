@@ -11,10 +11,10 @@ RZRestCall class >> pattern [
 
 { #category : #accessing }
 RZRestCall >> endpoint [
-	^ delegate endpoint
+	^ delegate node
 ]
 
-{ #category : #'as yet unclassified' }
-RZRestCall >> rhizome [
-	^ delegate endpoint
+{ #category : #accessing }
+RZRestCall >> node [ 
+	^ delegate node 
 ]

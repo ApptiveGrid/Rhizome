@@ -2,17 +2,17 @@ Class {
 	#name : #RZSimpleDatabaseLocator,
 	#superclass : #Object,
 	#instVars : [
-		'endpoint'
+		'node'
 	],
 	#category : #'Rhizome-Core-Rhizome-Core'
 }
 
 { #category : #accessing }
-RZSimpleDatabaseLocator >> endpoint: aRZEndpoint [ 
-	endpoint := aRZEndpoint 
+RZSimpleDatabaseLocator >> node: aRZNode [ 
+	node := aRZNode 
 ]
 
 { #category : #'as yet unclassified' }
 RZSimpleDatabaseLocator >> pathForId: aString [ 
-	^ endpoint basePath / aString
+	^ node basePath / aString
 ]
