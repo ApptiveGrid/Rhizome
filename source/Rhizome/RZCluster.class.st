@@ -7,6 +7,27 @@ Class {
 	#category : #Rhizome
 }
 
+{ #category : #adding }
+RZCluster >> addAddresses: aCollection [ 
+	self shouldBeImplemented.
+]
+
+{ #category : #adding }
+RZCluster >> addNode: aRZNode [ 
+	nodes add: aRZNode 
+]
+
+{ #category : #initialization }
+RZCluster >> initialize [ 
+	super initialize.
+	nodes := OrderedCollection new
+]
+
+{ #category : #'private - tree building' }
+RZCluster >> nodeNamed: aString [ 
+	^ nodes detect: [ :each | each hasName: aString ]
+]
+
 { #category : #'as yet unclassified' }
 RZCluster >> nodeWithAddress: anAddress [ 
 	^ nodes 

@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'address',
 		'name',
-		'images'
+		'virtualNodes'
 	],
 	#category : #Rhizome
 }
@@ -15,10 +15,17 @@ RZNode class >> name: aString [
 		name: aString 
 ]
 
+{ #category : #'as yet unclassified' }
+RZNode class >> name: aString address: addressString [ 
+	^ self new 
+		name: aString;
+		address: addressString
+]
+
 { #category : #adding }
-RZNode >> addImage: aRZImage [ 
+RZNode >> addVirtualNode: aRZImage [ 
 	aRZImage node: self.
-	images add: aRZImage 
+	virtualNodes add: aRZImage 
 ]
 
 { #category : #accessing }
@@ -31,15 +38,15 @@ RZNode >> address: aString [
 	address := aString
 ]
 
-{ #category : #accessing }
-RZNode >> images [
-	^ images
+{ #category : #testing }
+RZNode >> hasName: aString [ 
+	^ name = aString 
 ]
 
 { #category : #initialization }
 RZNode >> initialize [ 
 	super initialize.
-	images := OrderedCollection new
+	virtualNodes := OrderedCollection new
 ]
 
 { #category : #accessing }
@@ -59,9 +66,12 @@ RZNode >> port [
 
 { #category : #printing }
 RZNode >> printOn: aStream [ 
-	aStream << 'node: ' << name printString << '('.
-	images 
-		do: [:image| image printOn: aStream ]
-		separatedBy: [ aStream << ',' ].
-	aStream << ')'
+	aStream <<  name asString << '['.
+	address printOn: aStream.
+	aStream << ']'
+]
+
+{ #category : #accessing }
+RZNode >> virtualNodes [
+	^ virtualNodes
 ]
