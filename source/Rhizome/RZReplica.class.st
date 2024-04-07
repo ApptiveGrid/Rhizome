@@ -5,7 +5,6 @@ Class {
 		'soil',
 		'state',
 		'notificationHandler',
-		'members',
 		'virtualNode'
 	],
 	#category : #Rhizome
@@ -22,18 +21,6 @@ RZReplica >> doInitialSync: remote [
 		socket: (ZnWebSocket to: 'ws://', remote addressString ,':', remote port asString ,'/ws');
 		soil: soil;
 		traverse 
-]
-
-{ #category : #accessing }
-RZReplica >> endpointStatusAt: aReplica [ 
-	| response |
-	response := ZnClient new 
-		url: (ZnUrl new host: aReplica address printString; port: aReplica port) / #cluster / #databases / self databaseId;
-		get;
-		response.
-	^ response isSuccess 
-		ifTrue: [ STON fromString: response contents ]
-		ifFalse: [ nil ]
 ]
 
 { #category : #accessing }
@@ -59,32 +46,10 @@ RZReplica >> printOn: aStream [
 	virtualNode printOn: aStream 
 ]
 
-{ #category : #'as yet unclassified' }
-RZReplica >> replicateTransactionJournal: aSoilTransactionJournal [
-	members do: [ :member | 
-		member replicateTransactionJournal: aSoilTransactionJournal] 
-]
-
 { #category : #accessing }
 RZReplica >> soil: aSoil [ 
 	soil := aSoil.
 	soil notificationHandler: self notificationHandler
-]
-
-{ #category : #accessing }
-RZReplica >> start [
-	| memberStatus |
-	memberStatus := (members collect: [ :each | 
-		each -> (self endpointStatusAt: each)  ]) asDictionary.
-	memberStatus keysAndValuesDo: [ :remote :status |
-		status 
-			ifNotNil: [ 
-				(soil databaseVersion = status databaseVersion) ifFalse: [ 
-					(soil databaseVersion > status databaseVersion)
-						ifTrue: [ self syncTransactionJournalsFrom: status databaseVersion to: soil databaseVersion ]
-						ifFalse: [ Error signal: 'replica is newer' ] ] ]
-			ifNil: [ self doInitialSync: remote ]
-		 ]
 ]
 
 { #category : #accessing }
@@ -107,9 +72,4 @@ RZReplica >> transactionCreated: aSoilTransaction [
 { #category : #accessing }
 RZReplica >> virtualNode: aRZVirtualNode [ 
 	virtualNode := aRZVirtualNode 
-]
-
-{ #category : #'as yet unclassified' }
-RZReplica >> virtualNode: aRZLocalNode resolveVirtualNodeForKey: aString [ 
-	self shouldBeImplemented.
 ]

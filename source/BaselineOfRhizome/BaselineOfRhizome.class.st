@@ -12,9 +12,10 @@ BaselineOfRhizome >> baseline: spec [
 		do: [ 
 			self 
 				gossip: spec;
-				soil: spec.
+				soil: spec;
+				zinc: spec.
 			spec
-				package: 'Rhizome' with: [ spec requires: #('Gossip' 'Soil') ];
+				package: 'Rhizome' with: [ spec requires: #('Gossip' 'Soil' 'ZincHTTPComponents') ];
 				package: 'Rhizome-Tests' with: [ spec requires: #('Rhizome') ].
 
 			spec
@@ -36,4 +37,12 @@ BaselineOfRhizome >> soil: spec [
 	spec baseline: 'Soil' with: [ 
 		spec 
 			repository: 'github://ApptiveGrid/Soil:main/src' ]
+]
+
+{ #category : #baselines }
+BaselineOfRhizome >> zinc: spec [
+	spec baseline: 'ZincHTTPComponents' with: [ 
+		spec 
+			loads: #('REST' 'WebSocket');
+			repository: 'github://svenvc/zinc/repository']
 ]
