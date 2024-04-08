@@ -67,7 +67,7 @@ RZNode >> initialize [
 
 { #category : #testing }
 RZNode >> isLocalNode [
-	^ false
+	self subclassResponsibility 
 ]
 
 { #category : #accessing }
@@ -81,12 +81,8 @@ RZNode >> name: aString [
 ]
 
 { #category : #accessing }
-RZNode >> port [
-	self shouldBeImplemented.
-]
-
-{ #category : #accessing }
 RZNode >> portAt: aNumber [ 
+self halt.
 	^ virtualNodes detect: [ :each | each port = aNumber  ]
 ]
 

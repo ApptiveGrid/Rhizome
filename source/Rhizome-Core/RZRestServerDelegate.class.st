@@ -2,19 +2,19 @@ Class {
 	#name : #RZRestServerDelegate,
 	#superclass : #ZnJSONRestServerDelegate,
 	#instVars : [
-		'node'
+		'virtualNode'
 	],
 	#category : #'Rhizome-Core-Rhizome-Core'
 }
 
 { #category : #accessing }
-RZRestServerDelegate >> node [
+RZRestServerDelegate >> virtualNode [
 
-	^ node
+	^ virtualNode
 ]
 
 { #category : #accessing }
-RZRestServerDelegate >> node: anObject [
+RZRestServerDelegate >> virtualNode: anObject [
 
-	node := anObject
+	virtualNode := anObject
 ]

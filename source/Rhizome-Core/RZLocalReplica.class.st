@@ -22,7 +22,7 @@ RZLocalReplica >> databaseVersion [
 { #category : #'as yet unclassified' }
 RZLocalReplica >> doInitialSync: remote [
 	RZSoilReplicateVisitor new 
-		socket: (ZnWebSocket to: 'ws://', remote addressString ,':', remote port asString ,'/ws');
+		socket: (ZnWebSocket to: 'ws://', remote address ,':', remote port asString ,'/ws');
 		soil: soil;
 		traverse 
 ]

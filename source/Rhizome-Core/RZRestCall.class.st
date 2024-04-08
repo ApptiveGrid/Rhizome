@@ -10,11 +10,6 @@ RZRestCall class >> pattern [
 ]
 
 { #category : #accessing }
-RZRestCall >> endpoint [
-	^ delegate node
-]
-
-{ #category : #accessing }
-RZRestCall >> node [ 
-	^ delegate node 
+RZRestCall >> virtualNode [
+	^ delegate virtualNode 
 ]

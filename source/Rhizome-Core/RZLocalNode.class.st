@@ -2,7 +2,6 @@ Class {
 	#name : #RZLocalNode,
 	#superclass : #RZNode,
 	#instVars : [
-		'server',
 		'basePath',
 		'databaseLocator'
 	],
@@ -71,28 +70,27 @@ RZLocalNode >> isLocalNode [
 
 { #category : #'as yet unclassified' }
 RZLocalNode >> localVirtualNode [
-	^ virtualNodes detect: [ :each | each port = server port ]
+	^ virtualNodes detect: [ :each | each isKindOf: RZLocalVirtualNode ]
 ]
 
 { #category : #accessing }
-RZLocalNode >> port: anInteger [ 
-	self server port: anInteger 
+RZLocalNode >> network [
+	^ cluster network
+]
+
+{ #category : #'as yet unclassified' }
+RZLocalNode >> registerNode [
+	self network registerNode: self
 ]
 
 { #category : #'as yet unclassified' }
 RZLocalNode >> registerOnPort: anInteger [ 
 	"create a REST server with the port and add a virtual node
 	with the same setting so we can know which virtual node we are"
-	self server port: anInteger.
-	self addVirtualNode: (RZLocalVirtualNode port: anInteger)
-]
-
-{ #category : #accessing }
-RZLocalNode >> server [
-	^ server ifNil: [ 
-		server := cluster network newRestServer
-			node: self;
-			yourself ]
+	| virtualNode |
+	virtualNode := RZLocalVirtualNode port: anInteger.
+	self addVirtualNode: virtualNode.
+	(self network addressAt: address) at: anInteger put: virtualNode server 
 ]
 
 { #category : #accessing }

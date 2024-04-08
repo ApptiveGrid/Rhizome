@@ -56,7 +56,6 @@ RZSimulatedTest >> nodeList [
 RZSimulatedTest >> setUp [ 
 	super setUp.
 	network := RZSimulatedNetwork new. 
-	clusters := Dictionary new.
 	self nodeList do: [ :assoc | | cluster |
 		cluster := RZCluster new 
 			localAddress: assoc value;
@@ -64,11 +63,12 @@ RZSimulatedTest >> setUp [
 		cluster network: network.
 		cluster localNode 
 			basePath: ('rhizome/', assoc value asString);
-			createDatabaseWithId: '012345';
-			registerOnPort: 5555.
-		network registerNode: cluster localNode.
-		clusters at: assoc value put: cluster ]. 
-	clusters do: #announceAll.
+			registerNode;
+			registerOnPort: 5555 ]. 
+	"clusters do: #announceAll."
+	network hosts do: [ :host | 
+		host keysAndValuesDo: [ :port :server | 
+			server cluster announceAll ] ] 
 
 ]
 
@@ -85,12 +85,15 @@ RZSimulatedTest >> testDummy [
 
 { #category : #tests }
 RZSimulatedTest >> testResolveReplicaSet [
-	| set db txn |
-	set := (clusters at: '127.0.0.1') replicaSetForKey: '012345'.
+	| set db txn virtualNode |
+	virtualNode := ((network addressAt: '127.0.0.1') at: 5555) virtualNode.
+	virtualNode node createDatabaseWithId: '012345'.
+	set := virtualNode cluster replicaSetForKey: '012345'.
 	db := set replicas first soil.
 	txn := db newTransaction.
 	txn root: Dictionary new.
 	txn commit.
 	set start.
+	self halt.
 	
 ]

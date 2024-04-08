@@ -12,7 +12,7 @@ RZDatabasesCall class >> pattern [
 { #category : #public }
 RZDatabasesCall >> get [ 
 	| db |
-	db := self node
+	db := self virtualNode node
 		databaseWithId: request url pathSegments second
 		ifAbsent: [
 			response :=  ZnResponse notFound: request url.
