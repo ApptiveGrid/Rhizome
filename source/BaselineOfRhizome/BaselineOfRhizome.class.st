@@ -16,7 +16,7 @@ BaselineOfRhizome >> baseline: spec [
 				zinc: spec.
 			spec
 				package: 'Rhizome-Core' with: [ spec requires: #('Gossip' 'Soil' 'ZincHTTPComponents') ];
-				package: 'Rhizome-Tests' with: [ spec requires: #('Rhizome') ].
+				package: 'Rhizome-Tests' with: [ spec requires: #('Rhizome-Core') ].
 
 			spec
 				group: 'default' with: #('Core');
