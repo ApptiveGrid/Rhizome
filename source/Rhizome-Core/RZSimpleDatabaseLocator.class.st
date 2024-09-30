@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'node'
 	],
-	#category : #'Rhizome-Core-Rhizome-Core'
+	#category : #'Rhizome-Core'
 }
 
 { #category : #accessing }

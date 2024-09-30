@@ -1,7 +1,7 @@
 Class {
 	#name : #RZReplicateTransactionJournalCall,
 	#superclass : #RZRestCall,
-	#category : #'Rhizome-Core-Rhizome-Core'
+	#category : #'Rhizome-Core'
 }
 
 { #category : #accessing }

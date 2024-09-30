@@ -5,7 +5,7 @@ Class {
 		'endpoint',
 		'database'
 	],
-	#category : #'Rhizome-Core-Rhizome-Core'
+	#category : #'Rhizome-Core'
 }
 
 { #category : #accessing }

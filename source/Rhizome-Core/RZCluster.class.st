@@ -7,7 +7,7 @@ Class {
 		'placementStrategy',
 		'network'
 	],
-	#category : #'Rhizome-Core-Rhizome-Core'
+	#category : #'Rhizome-Core'
 }
 
 { #category : #adding }

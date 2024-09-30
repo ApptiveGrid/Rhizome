@@ -1,7 +1,7 @@
 Class {
 	#name : #RZRemoteNode,
 	#superclass : #RZNode,
-	#category : #'Rhizome-Core-Rhizome-Core'
+	#category : #'Rhizome-Core'
 }
 
 { #category : #testing }

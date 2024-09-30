@@ -1,7 +1,7 @@
 Class {
 	#name : #RZRemoteReplica,
 	#superclass : #RZReplica,
-	#category : #'Rhizome-Core-Rhizome-Core'
+	#category : #'Rhizome-Core'
 }
 
 { #category : #'instance creationb' }
