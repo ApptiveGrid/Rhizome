@@ -12,10 +12,11 @@ BaselineOfRhizome >> baseline: spec [
 		do: [ 
 			self 
 				gossip: spec;
+				murmur3: spec;
 				soil: spec;
 				zinc: spec.
 			spec
-				package: 'Rhizome-Core' with: [ spec requires: #('Gossip' 'Soil' 'ZincHTTPComponents') ];
+				package: 'Rhizome-Core' with: [ spec requires: #('NonCryptographicHashes' 'Gossip' 'Soil' 'ZincHTTPComponents') ];
 				package: 'Rhizome-Tests' with: [ spec requires: #('Rhizome-Core') ].
 
 			spec
@@ -29,6 +30,13 @@ BaselineOfRhizome >> gossip: spec [
 	spec baseline: 'Gossip' with: [ 
 		spec 
 			repository: 'github://ApptiveGrid/Gossip:main/source' ]
+]
+
+{ #category : #'as yet unclassified' }
+BaselineOfRhizome >> murmur3: spec [ 
+	spec baseline: 'NonCryptographicHashes' with: [ 
+		spec 
+			repository: 'github://ApptiveGrid/pharo-non-cryptographic-hashes:master/src' ]
 ]
 
 { #category : #accessing }
