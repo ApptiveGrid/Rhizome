@@ -1,25 +1,26 @@
 Class {
-	#name : #RZReplicaSet,
-	#superclass : #Object,
+	#name : 'RZReplicaSet',
+	#superclass : 'Object',
 	#instVars : [
 		'key',
 		'replicas',
 		'cluster'
 	],
-	#category : #'Rhizome-Core'
+	#category : 'Rhizome-Core',
+	#package : 'Rhizome-Core'
 }
 
-{ #category : #adding }
+{ #category : 'adding' }
 RZReplicaSet >> addReplica: aRZReplica [ 
 	replicas add: aRZReplica 
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZReplicaSet >> cluster: aRZCluster [ 
 	cluster := aRZCluster
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZReplicaSet >> endpointStatusAt: aReplica [ 
 	| response |
 	
@@ -32,51 +33,51 @@ RZReplicaSet >> endpointStatusAt: aReplica [
 		ifFalse: [ nil ]
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 RZReplicaSet >> initialize [ 
 	super initialize.
 	replicas := OrderedCollection new
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZReplicaSet >> key [
 
 	^ key
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZReplicaSet >> key: anObject [
 
 	key := anObject
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : 'as yet unclassified' }
 RZReplicaSet >> localReplica [
 	^ replicas detect: [ :replica | replica node = cluster localNode ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : 'as yet unclassified' }
 RZReplicaSet >> remoteReplicas [
 	^ replicas reject: [ :each | each node = cluster localNode ]
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZReplicaSet >> replicas [
 	^ replicas
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZReplicaSet >> replicateTransactionJournal: aSoilTransactionJournal [
 	self remoteReplicas do: [ :replica | 
 		replica replicateTransactionJournal: aSoilTransactionJournal] 
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZReplicaSet >> size [ 
 	^ replicas size 
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZReplicaSet >> start [
 	| memberStatus |
 	memberStatus := (self remoteReplicas collect: [ :each | 

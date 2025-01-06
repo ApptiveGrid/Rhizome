@@ -1,21 +1,22 @@
 Class {
-	#name : #RZRestServer,
-	#superclass : #Object,
+	#name : 'RZRestServer',
+	#superclass : 'Object',
 	#instVars : [
 		'port',
 		'server',
 		'address',
 		'node'
 	],
-	#category : #'Rhizome-Core'
+	#category : 'Rhizome-Core',
+	#package : 'Rhizome-Core'
 }
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZRestServer >> address: aString [ 
 	address := aString
 ]
 
-{ #category : #running }
+{ #category : 'running' }
 RZRestServer >> apiHandler [ 
 	^ RZRestServerDelegate new 
 		node: self node;
@@ -23,12 +24,12 @@ RZRestServer >> apiHandler [
 			rootClass: RZRestCall)
 ]
 
-{ #category : #running }
+{ #category : 'running' }
 RZRestServer >> apiPrefix [
 	^ #cluster
 ]
 
-{ #category : #running }
+{ #category : 'running' }
 RZRestServer >> buildServer [
 	^ (ZnServer on: self port)
 	   delegate: self handler;
@@ -36,12 +37,12 @@ RZRestServer >> buildServer [
 		yourself
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZRestServer >> defaultPort [
 	^ 4850
 ]
 
-{ #category : #running }
+{ #category : 'running' }
 RZRestServer >> handler [ 
 	| handler |
 	handler := ZnPrefixMappingDelegate new
@@ -60,44 +61,44 @@ RZRestServer >> handler [
 	
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZRestServer >> node [
 
 	^ node
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZRestServer >> node: anObject [
 
 	node := anObject
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZRestServer >> port [
 	^ port ifNil: [ 
 		port := self defaultPort ]
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZRestServer >> port: aNumber [ 
 	port := aNumber 
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZRestServer >> start [
 	server := self buildServer.
 	server debugMode: true.
 	server start
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZRestServer >> stop [
 	server ifNotNil: [ 
 		server stop ].
 
 ]
 
-{ #category : #running }
+{ #category : 'running' }
 RZRestServer >> websocketHandler [
 	^ ZnWebSocketDelegate handler: (RZWebsocketHandler new node: self node)
 ]

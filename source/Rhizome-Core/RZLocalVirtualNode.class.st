@@ -1,23 +1,25 @@
 Class {
-	#name : #RZLocalVirtualNode,
-	#superclass : #RZVirtualNode,
+	#name : 'RZLocalVirtualNode',
+	#superclass : 'RZVirtualNode',
 	#instVars : [
 		'server'
 	],
-	#category : #'Rhizome-Core-Objects'
+	#category : 'Rhizome-Core-Objects',
+	#package : 'Rhizome-Core',
+	#tag : 'Objects'
 }
 
-{ #category : #testing }
+{ #category : 'testing' }
 RZLocalVirtualNode >> isLocal [ 
 	^ true
 ]
 
-{ #category : #testing }
+{ #category : 'testing' }
 RZLocalVirtualNode >> isLocalVirtualNode [
 	^ true
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZLocalVirtualNode >> server [
 	^ server ifNil: [ 
 		server := self cluster network newRestServer

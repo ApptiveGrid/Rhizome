@@ -1,10 +1,11 @@
 Class {
-	#name : #RZSuccess,
-	#superclass : #RZResponse,
-	#category : #'Rhizome-Core'
+	#name : 'RZSuccess',
+	#superclass : 'RZResponse',
+	#category : 'Rhizome-Core',
+	#package : 'Rhizome-Core'
 }
 
-{ #category : #testing }
+{ #category : 'testing' }
 RZSuccess >> isSuccess [
 	^ true
 ]

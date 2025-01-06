@@ -1,18 +1,19 @@
 Class {
-	#name : #RZSimpleDatabaseLocator,
-	#superclass : #Object,
+	#name : 'RZSimpleDatabaseLocator',
+	#superclass : 'Object',
 	#instVars : [
 		'node'
 	],
-	#category : #'Rhizome-Core'
+	#category : 'Rhizome-Core',
+	#package : 'Rhizome-Core'
 }
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZSimpleDatabaseLocator >> node: aRZNode [ 
 	node := aRZNode 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : 'as yet unclassified' }
 RZSimpleDatabaseLocator >> pathForId: aString [ 
 	^ node basePath / aString
 ]

@@ -1,24 +1,25 @@
 Class {
-	#name : #RZSoilReplicateVisitor,
-	#superclass : #SoilInstanceVisitor,
+	#name : 'RZSoilReplicateVisitor',
+	#superclass : 'SoilVisitor',
 	#instVars : [
 		'socket'
 	],
-	#category : #'Rhizome-Core'
+	#category : 'Rhizome-Core',
+	#package : 'Rhizome-Core'
 }
 
-{ #category : #'private - protocol' }
+{ #category : 'private - protocol' }
 RZSoilReplicateVisitor >> sendCommand: aCommand [ 
 	socket sendMessage: aCommand serialize.
 	^ STON fromString: socket readMessage
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZSoilReplicateVisitor >> socket: aZnWebSocket [ 
 	socket := aZnWebSocket
 ]
 
-{ #category : #api }
+{ #category : 'api' }
 RZSoilReplicateVisitor >> traverse [
 	| response |
 	response := self sendCommand: (RZInitializeDatabase new 
@@ -28,7 +29,7 @@ RZSoilReplicateVisitor >> traverse [
 	super traverse: soil
 ]
 
-{ #category : #api }
+{ #category : 'api' }
 RZSoilReplicateVisitor >> traverse: aSoil [ 
 	| response |
 	response := self sendCommand: (RZInitializeDatabase new id: soil id).
@@ -36,22 +37,22 @@ RZSoilReplicateVisitor >> traverse: aSoil [
 	self halt.
 ]
 
-{ #category : #visiting }
+{ #category : 'visiting' }
 RZSoilReplicateVisitor >> visitDatabaseJournal: aSoilJournal [ 
 	^ aSoilJournal 
 ]
 
-{ #category : #visiting }
+{ #category : 'visiting' }
 RZSoilReplicateVisitor >> visitMetaSegment: aSoilMetaSegment [ 
 	^ aSoilMetaSegment 
 ]
 
-{ #category : #visiting }
+{ #category : 'visiting' }
 RZSoilReplicateVisitor >> visitParameters: aSoilParameterFile [ 	
 	^ aSoilParameterFile 
 ]
 
-{ #category : #visiting }
+{ #category : 'visiting' }
 RZSoilReplicateVisitor >> visitPersistentClusterVersion: aSoilPersistentClusterVersion [ 
 	| backupCluster |
 	backupCluster := aSoilPersistentClusterVersion copy
