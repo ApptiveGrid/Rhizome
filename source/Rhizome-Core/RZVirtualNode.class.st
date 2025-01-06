@@ -1,72 +1,74 @@
 Class {
-	#name : #RZVirtualNode,
-	#superclass : #Object,
+	#name : 'RZVirtualNode',
+	#superclass : 'Object',
 	#instVars : [
 		'port',
 		'node'
 	],
-	#category : #'Rhizome-Core-Objects'
+	#category : 'Rhizome-Core-Objects',
+	#package : 'Rhizome-Core',
+	#tag : 'Objects'
 }
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZVirtualNode class >> port: anInteger [ 
 	^ self new 
 		port: anInteger 
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZVirtualNode >> address [
 	^ node address
 ]
 
-{ #category : #'public - layout' }
+{ #category : 'public - layout' }
 RZVirtualNode >> cluster [
 	^ node cluster 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : 'as yet unclassified' }
 RZVirtualNode >> handlesKey: aString [ 
 	^ false
 ]
 
-{ #category : #testing }
+{ #category : 'testing' }
 RZVirtualNode >> isLocalNode [
 	^ node isLocal
 ]
 
-{ #category : #testing }
+{ #category : 'testing' }
 RZVirtualNode >> isLocalVirtualNode [
 	self subclassResponsibility 
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZVirtualNode >> node [
 	^ node
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZVirtualNode >> node: aRZNode [ 
 	node := aRZNode 
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZVirtualNode >> port [
 	^ port
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZVirtualNode >> port: anInteger [ 
 	port := anInteger
 ]
 
-{ #category : #printing }
+{ #category : 'printing' }
 RZVirtualNode >> printOn: aStream [ 
 	aStream << 'port: ' << port asString.
 	aStream << ', '.
 	node printOn: aStream
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : 'as yet unclassified' }
 RZVirtualNode >> targetVirtualNodeFor: aString [ 
 	^ (self handlesKey: aString)
 		ifTrue: [ self ]

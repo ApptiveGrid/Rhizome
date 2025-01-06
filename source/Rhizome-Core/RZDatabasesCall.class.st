@@ -1,15 +1,16 @@
 Class {
-	#name : #RZDatabasesCall,
-	#superclass : #RZRestCall,
-	#category : #'Rhizome-Core'
+	#name : 'RZDatabasesCall',
+	#superclass : 'RZRestCall',
+	#category : 'Rhizome-Core',
+	#package : 'Rhizome-Core'
 }
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZDatabasesCall class >> pattern [ 
 	^ #( 'databases' '*' )
 ]
 
-{ #category : #public }
+{ #category : 'public' }
 RZDatabasesCall >> get [ 
 	| db |
 	db := self virtualNode node

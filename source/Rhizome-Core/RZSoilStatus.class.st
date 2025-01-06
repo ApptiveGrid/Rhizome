@@ -1,23 +1,24 @@
 Class {
-	#name : #RZSoilStatus,
-	#superclass : #Object,
+	#name : 'RZSoilStatus',
+	#superclass : 'Object',
 	#instVars : [
 		'databaseVersion'
 	],
-	#category : #'Rhizome-Core'
+	#category : 'Rhizome-Core',
+	#package : 'Rhizome-Core'
 }
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZSoilStatus >> databaseVersion [
 	^ databaseVersion
 ]
 
-{ #category : #printing }
+{ #category : 'printing' }
 RZSoilStatus >> printOn: aStream [ 
 	aStream << 'database version: ' << databaseVersion printString 
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZSoilStatus >> soil: aSoil [ 
 	aSoil isOpen ifFalse: [ 
 		aSoil open ].

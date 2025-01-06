@@ -1,40 +1,41 @@
 Class {
-	#name : #RZReplica,
-	#superclass : #Object,
+	#name : 'RZReplica',
+	#superclass : 'Object',
 	#instVars : [
 		'replicaSet',
 		'virtualNode'
 	],
-	#category : #'Rhizome-Core'
+	#category : 'Rhizome-Core',
+	#package : 'Rhizome-Core'
 }
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZReplica >> address [
 	^ virtualNode address
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZReplica >> node [
 	^ virtualNode node
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZReplica >> port [
 	^ virtualNode port
 ]
 
-{ #category : #printing }
+{ #category : 'printing' }
 RZReplica >> printOn: aStream [ 
 	aStream << 'replica on '.
 	virtualNode printOn: aStream 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : 'as yet unclassified' }
 RZReplica >> replicaSet: aRZReplicaSet [ 
 	replicaSet := aRZReplicaSet 
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZReplica >> virtualNode: aRZVirtualNode [ 
 	virtualNode := aRZVirtualNode 
 ]

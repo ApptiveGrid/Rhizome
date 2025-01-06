@@ -1,18 +1,19 @@
 Class {
-	#name : #RZRendezvousHashingStrategy,
-	#superclass : #Object,
+	#name : 'RZRendezvousHashingStrategy',
+	#superclass : 'Object',
 	#instVars : [
 		'cluster'
 	],
-	#category : #'Rhizome-Core'
+	#category : 'Rhizome-Core',
+	#package : 'Rhizome-Core'
 }
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZRendezvousHashingStrategy >> cluster: aRZCluster [ 
 	cluster := aRZCluster 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : 'as yet unclassified' }
 RZRendezvousHashingStrategy >> nodeNameForKey: aString [ 
 	| names hashes |
 	names := cluster nodeNames.
@@ -22,7 +23,7 @@ RZRendezvousHashingStrategy >> nodeNameForKey: aString [
 	^ names at: (hashes indexOf: hashes sorted last)
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : 'as yet unclassified' }
 RZRendezvousHashingStrategy >> nodeNamesForKey: aString [ 
 	| names hashes |
 	names := cluster nodeNames.

@@ -1,39 +1,40 @@
 Class {
-	#name : #RZWebsocketHandler,
-	#superclass : #Object,
+	#name : 'RZWebsocketHandler',
+	#superclass : 'Object',
 	#instVars : [
 		'endpoint',
 		'database'
 	],
-	#category : #'Rhizome-Core'
+	#category : 'Rhizome-Core',
+	#package : 'Rhizome-Core'
 }
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZWebsocketHandler >> database [
 	^ database
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZWebsocketHandler >> database: aSoil [ 
 	database := aSoil
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZWebsocketHandler >> databaseId: aString [ 
 	database := endpoint databaseWithId: aString ifAbsent: [ Error signal: 'nope' ] 
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZWebsocketHandler >> endpoint [
 	^ endpoint
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : 'as yet unclassified' }
 RZWebsocketHandler >> endpoint: anEndpoint [
 	endpoint := anEndpoint 
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZWebsocketHandler >> handleMessage: message [
 	| command |
 	command := message materialize.
@@ -41,18 +42,18 @@ RZWebsocketHandler >> handleMessage: message [
 	^ STON toString: RZSuccess new
 ]
 
-{ #category : #public }
+{ #category : 'public' }
 RZWebsocketHandler >> handleRequest: aZnRequest [ 
 	Transcript show: 'got request: ', aZnRequest printString; cr.
 	^ self value: aZnRequest 
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZWebsocketHandler >> soil [
 	^ endpoint soil
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZWebsocketHandler >> value: webSocket [
 	"I implement an echo service conversation as a server:
 	reading messages and echoing them back until ConnectionClosed"

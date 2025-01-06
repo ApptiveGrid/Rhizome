@@ -1,1 +1,1 @@
-Package { #name : #'Rhizome-Core' }
+Package { #name : 'Rhizome-Core' }

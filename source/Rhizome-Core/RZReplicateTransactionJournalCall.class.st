@@ -1,15 +1,16 @@
 Class {
-	#name : #RZReplicateTransactionJournalCall,
-	#superclass : #RZRestCall,
-	#category : #'Rhizome-Core'
+	#name : 'RZReplicateTransactionJournalCall',
+	#superclass : 'RZRestCall',
+	#category : 'Rhizome-Core',
+	#package : 'Rhizome-Core'
 }
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZReplicateTransactionJournalCall class >> pattern [ 
 	^ #( 'databases' '*' 'journals' )
 ]
 
-{ #category : #public }
+{ #category : 'public' }
 RZReplicateTransactionJournalCall >> get [ 
 	| db |
 	db := self endpoint
@@ -22,7 +23,7 @@ RZReplicateTransactionJournalCall >> get [
 		type: (ZnMimeType main: 'text' sub: 'ston'))
 ]
 
-{ #category : #public }
+{ #category : 'public' }
 RZReplicateTransactionJournalCall >> post [ 
 	| db |
 	db := self endpoint

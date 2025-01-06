@@ -1,23 +1,24 @@
 Class {
-	#name : #RZBinaryCommand,
-	#superclass : #RZCommand,
-	#category : #'Rhizome-Core'
+	#name : 'RZBinaryCommand',
+	#superclass : 'RZCommand',
+	#category : 'Rhizome-Core',
+	#package : 'Rhizome-Core'
 }
 
-{ #category : #'instance creation' }
+{ #category : 'instance creation' }
 RZBinaryCommand class >> readFrom: stream [ 
 	^ self new 
 		readFrom: stream 
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZBinaryCommand class >> withType: anInteger [ 
 	^ (self allSubclasses reject: #isAbstract)	
 		detect: [ :each | each typeCode = anInteger ]
 		ifNone: [ Error signal: 'cannot find command for type code ', anInteger printString ]
 ]
 
-{ #category : #serializing }
+{ #category : 'serializing' }
 RZBinaryCommand >> serialize [
 	^ ByteArray streamContents: [ :stream |
 		stream nextPut: self class typeCode.
