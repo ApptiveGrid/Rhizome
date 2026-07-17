@@ -27,8 +27,8 @@ RZCluster >> announceAll [
 RZCluster >> buildNodesFromList: aCollection [ 
 	aCollection do: [ :assoc | 
 		self addNode: ((assoc value = localAddress)
-			ifTrue: [  RZLocalNode name: assoc key address: assoc value ]
-			ifFalse: [ RZRemoteNode name: assoc key address: assoc value ]) ]
+			ifTrue: [  RZLocalHost name: assoc key address: assoc value ]
+			ifFalse: [ RZRemoteHost name: assoc key address: assoc value ]) ]
 ]
 
 { #category : 'as yet unclassified' }

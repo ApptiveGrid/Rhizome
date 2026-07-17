@@ -1,12 +1,12 @@
 Class {
-	#name : 'RZRemoteVirtualNode',
-	#superclass : 'RZVirtualNode',
+	#name : 'RZRemoteImage',
+	#superclass : 'RZImage',
 	#category : 'Rhizome-Core-Objects',
 	#package : 'Rhizome-Core',
 	#tag : 'Objects'
 }
 
 { #category : 'testing' }
-RZRemoteVirtualNode >> isLocalVirtualNode [
+RZRemoteImage >> isLocalVirtualNode [
 	^ false
 ]

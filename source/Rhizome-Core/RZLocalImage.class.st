@@ -1,6 +1,6 @@
 Class {
-	#name : 'RZLocalVirtualNode',
-	#superclass : 'RZVirtualNode',
+	#name : 'RZLocalImage',
+	#superclass : 'RZImage',
 	#instVars : [
 		'server'
 	],
@@ -10,17 +10,17 @@ Class {
 }
 
 { #category : 'testing' }
-RZLocalVirtualNode >> isLocal [ 
+RZLocalImage >> isLocal [ 
 	^ true
 ]
 
 { #category : 'testing' }
-RZLocalVirtualNode >> isLocalVirtualNode [
+RZLocalImage >> isLocalVirtualNode [
 	^ true
 ]
 
 { #category : 'accessing' }
-RZLocalVirtualNode >> server [
+RZLocalImage >> server [
 	^ server ifNil: [ 
 		server := self cluster network newRestServer
 			virtualNode: self; 

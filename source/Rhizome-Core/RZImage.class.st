@@ -1,5 +1,5 @@
 Class {
-	#name : 'RZVirtualNode',
+	#name : 'RZImage',
 	#superclass : 'Object',
 	#instVars : [
 		'port',
@@ -11,65 +11,65 @@ Class {
 }
 
 { #category : 'accessing' }
-RZVirtualNode class >> port: anInteger [ 
+RZImage class >> port: anInteger [ 
 	^ self new 
 		port: anInteger 
 ]
 
 { #category : 'accessing' }
-RZVirtualNode >> address [
+RZImage >> address [
 	^ node address
 ]
 
 { #category : 'public - layout' }
-RZVirtualNode >> cluster [
+RZImage >> cluster [
 	^ node cluster 
 ]
 
 { #category : 'as yet unclassified' }
-RZVirtualNode >> handlesKey: aString [ 
+RZImage >> handlesKey: aString [ 
 	^ false
 ]
 
 { #category : 'testing' }
-RZVirtualNode >> isLocalNode [
+RZImage >> isLocalNode [
 	^ node isLocal
 ]
 
 { #category : 'testing' }
-RZVirtualNode >> isLocalVirtualNode [
+RZImage >> isLocalVirtualNode [
 	self subclassResponsibility 
 ]
 
 { #category : 'accessing' }
-RZVirtualNode >> node [
+RZImage >> node [
 	^ node
 ]
 
 { #category : 'accessing' }
-RZVirtualNode >> node: aRZNode [ 
+RZImage >> node: aRZNode [ 
 	node := aRZNode 
 ]
 
 { #category : 'accessing' }
-RZVirtualNode >> port [
+RZImage >> port [
 	^ port
 ]
 
 { #category : 'accessing' }
-RZVirtualNode >> port: anInteger [ 
+RZImage >> port: anInteger [ 
 	port := anInteger
 ]
 
 { #category : 'printing' }
-RZVirtualNode >> printOn: aStream [ 
+RZImage >> printOn: aStream [ 
 	aStream << 'port: ' << port asString.
 	aStream << ', '.
 	node printOn: aStream
 ]
 
 { #category : 'as yet unclassified' }
-RZVirtualNode >> targetVirtualNodeFor: aString [ 
+RZImage >> targetVirtualNodeFor: aString [ 
 	^ (self handlesKey: aString)
 		ifTrue: [ self ]
 		ifFalse: [ (node resolveNodeForKey: aString) resolveVirtualNodeForKey: aString  ] 

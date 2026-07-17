@@ -1,5 +1,5 @@
 Class {
-	#name : 'RZNode',
+	#name : 'RZHost',
 	#superclass : 'Object',
 	#instVars : [
 		'name',
@@ -12,110 +12,110 @@ Class {
 }
 
 { #category : 'accessing' }
-RZNode class >> name: aString [ 
+RZHost class >> name: aString [ 
 	^ self new 
 		name: aString 
 ]
 
 { #category : 'as yet unclassified' }
-RZNode class >> name: aString address: addressString [ 
+RZHost class >> name: aString address: addressString [ 
 	^ self new 
 		name: aString;
 		address: addressString
 ]
 
 { #category : 'adding' }
-RZNode >> addVirtualNode: aRZImage [ 
+RZHost >> addVirtualNode: aRZImage [ 
 	aRZImage node: self.
 	virtualNodes add: aRZImage 
 ]
 
 { #category : 'adding' }
-RZNode >> addVirtualNodeWithPort: anInteger [ 
+RZHost >> addVirtualNodeWithPort: anInteger [ 
 	self addVirtualNode: (self virtualNodeClass port: anInteger)
 ]
 
 { #category : 'accessing' }
-RZNode >> address [
+RZHost >> address [
 	^ address
 ]
 
 { #category : 'accessing' }
-RZNode >> address: aString [ 
+RZHost >> address: aString [ 
 	address := aString
 ]
 
 { #category : 'accessing' }
-RZNode >> cluster [
+RZHost >> cluster [
 	^ cluster
 ]
 
 { #category : 'accessing' }
-RZNode >> cluster: aRZCluster [ 
+RZHost >> cluster: aRZCluster [ 
 	cluster := aRZCluster
 ]
 
 { #category : 'testing' }
-RZNode >> hasName: aString [ 
+RZHost >> hasName: aString [ 
 	^ name = aString 
 ]
 
 { #category : 'initialization' }
-RZNode >> initialize [ 
+RZHost >> initialize [ 
 	super initialize.
 	virtualNodes := OrderedCollection new
 ]
 
 { #category : 'testing' }
-RZNode >> isLocalNode [
+RZHost >> isLocalNode [
 	self subclassResponsibility 
 ]
 
 { #category : 'accessing' }
-RZNode >> name [
+RZHost >> name [
 	^ name
 ]
 
 { #category : 'accessing' }
-RZNode >> name: aString [ 
+RZHost >> name: aString [ 
 	name := aString 
 ]
 
 { #category : 'accessing' }
-RZNode >> portAt: aNumber [ 
+RZHost >> portAt: aNumber [ 
 self halt.
 	^ virtualNodes detect: [ :each | each port = aNumber  ]
 ]
 
 { #category : 'printing' }
-RZNode >> printOn: aStream [ 
+RZHost >> printOn: aStream [ 
 	aStream <<  name asString << '['.
 	address printOn: aStream.
 	aStream << ']'
 ]
 
 { #category : 'as yet unclassified' }
-RZNode >> resolveNodeForKey: aString [ 
+RZHost >> resolveNodeForKey: aString [ 
 	^ cluster nodeNameForKey: aString 
 ]
 
 { #category : 'as yet unclassified' }
-RZNode >> resolveVirtualNodeForKey: aString [ 
+RZHost >> resolveVirtualNodeForKey: aString [ 
 	virtualNodes ifEmpty: [ Error signal: 'node ', name , ' has no virtual nodes' ].
 	^ virtualNodes anyOne
 ]
 
 { #category : 'adding' }
-RZNode >> virtualNodeClass [
-	^ RZVirtualNode
+RZHost >> virtualNodeClass [
+	^ RZImage
 ]
 
 { #category : 'as yet unclassified' }
-RZNode >> virtualNodeWithPort: anInteger [ 
+RZHost >> virtualNodeWithPort: anInteger [ 
 	^ virtualNodes detect: [ :vnode | vnode port = anInteger ]
 ]
 
 { #category : 'accessing' }
-RZNode >> virtualNodes [
+RZHost >> virtualNodes [
 	^ virtualNodes
 ]
