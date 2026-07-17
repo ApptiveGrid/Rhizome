@@ -15,6 +15,11 @@ RZReplicaSet >> addReplica: aRZReplica [
 	replicas add: aRZReplica 
 ]
 
+{ #category : 'as yet unclassified' }
+RZReplicaSet >> cluster [
+	^ cluster
+]
+
 { #category : 'accessing' }
 RZReplicaSet >> cluster: aRZCluster [ 
 	cluster := aRZCluster
@@ -31,6 +36,15 @@ RZReplicaSet >> endpointStatusAt: aReplica [
 	^ response isSuccess 
 		ifTrue: [ STON fromString: response contents ]
 		ifFalse: [ nil ]
+]
+
+{ #category : 'as yet unclassified' }
+RZReplicaSet >> handleRemoteAheadOf: remote status: status [
+	(self replicaState isPrimary: self cluster hostLeaseManager selfHost)
+		ifTrue: [
+			Error signal: 'replica is newer, but we believe we are primary - inconsistent state, refusing to guess' ]
+		ifFalse: [
+			self localReplica markStale ]
 ]
 
 { #category : 'initialization' }
@@ -59,6 +73,14 @@ RZReplicaSet >> localReplica [
 { #category : 'as yet unclassified' }
 RZReplicaSet >> remoteReplicas [
 	^ replicas reject: [ :each | each node = cluster localNode ]
+]
+
+{ #category : 'as yet unclassified' }
+RZReplicaSet >> replicaState [
+	^ RZReplicaState new
+		store: self cluster ownershipStore;
+		dbId: self key;
+		yourself
 ]
 
 { #category : 'accessing' }
@@ -92,7 +114,7 @@ RZReplicaSet >> start [
 									syncTransactionJournalsFrom: status databaseVersion 
 									to: self localReplica databaseVersion
 									target: remote  ]
-						ifFalse: [ Error signal: 'replica is newer' ] ] ]
+						ifFalse: [ self handleRemoteAheadOf: remote status: status ] ] ]
 			ifNil: [ self localReplica doInitialSync: remote ]
 		 ]
 ]

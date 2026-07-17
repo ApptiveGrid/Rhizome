@@ -33,6 +33,16 @@ RZLocalReplica >> id [
 	^ soil path basename
 ]
 
+{ #category : 'as yet unclassified' }
+RZLocalReplica >> isStale [
+	^ state = #stale
+]
+
+{ #category : 'as yet unclassified' }
+RZLocalReplica >> markStale [
+	state := #stale
+]
+
 { #category : 'instance creation' }
 RZLocalReplica >> newNotificationHandler [
 	^ RZNotificationHandler new
@@ -60,6 +70,16 @@ RZLocalReplica >> soil [
 RZLocalReplica >> soil: aSoil [ 
 	soil := aSoil.
 	soil notificationHandler: self notificationHandler
+]
+
+{ #category : 'as yet unclassified' }
+RZLocalReplica >> state [
+	^ state
+]
+
+{ #category : 'as yet unclassified' }
+RZLocalReplica >> state: aSymbol [
+	state := aSymbol
 ]
 
 { #category : 'accessing' }
