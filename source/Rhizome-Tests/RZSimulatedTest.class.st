@@ -1,14 +1,15 @@
 Class {
-	#name : #RZSimulatedTest,
-	#superclass : #TestCase,
+	#name : 'RZSimulatedTest',
+	#superclass : 'TestCase',
 	#instVars : [
 		'network',
 		'clusters'
 	],
-	#category : #'Rhizome-Tests'
+	#category : 'Rhizome-Tests',
+	#package : 'Rhizome-Tests'
 }
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZSimulatedTest >> buildCluster [
 	^ RZCluster new 
 		localAddress: self localAddress;
@@ -16,7 +17,7 @@ RZSimulatedTest >> buildCluster [
 		 
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZSimulatedTest >> buildClusters [
 	^ RZCluster new 
 		localAddress: self localAddress;
@@ -24,24 +25,24 @@ RZSimulatedTest >> buildClusters [
 		 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : 'as yet unclassified' }
 RZSimulatedTest >> buildNetwork [ 
 	^ RZClusterSimulationBuilder new 
 		build: self cluster
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZSimulatedTest >> localAddress [
 	^ '127.0.0.1'
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZSimulatedTest >> network [
 	^ network ifNil: [ 
 		network := self buildNetwork  ]
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZSimulatedTest >> nodeList [ 
 	^ { 
 		#node1 -> '127.0.0.1'. 
@@ -52,7 +53,7 @@ RZSimulatedTest >> nodeList [
 		}
 ]
 
-{ #category : #running }
+{ #category : 'running' }
 RZSimulatedTest >> setUp [ 
 	super setUp.
 	network := RZSimulatedNetwork new. 
@@ -72,18 +73,18 @@ RZSimulatedTest >> setUp [
 
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZSimulatedTest >> tearDown [ 
 	super tearDown.
 	'rhizome' asFileReference ensureDeleteAll 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 RZSimulatedTest >> testDummy [ 
 	self halt.
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 RZSimulatedTest >> testResolveReplicaSet [
 	| set db txn virtualNode |
 	virtualNode := ((network addressAt: '127.0.0.1') at: 5555) virtualNode.

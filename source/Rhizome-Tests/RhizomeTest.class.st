@@ -1,18 +1,19 @@
 Class {
-	#name : #RhizomeTest,
-	#superclass : #TestCase,
+	#name : 'RhizomeTest',
+	#superclass : 'TestCase',
 	#instVars : [
 		'cluster'
 	],
-	#category : #'Rhizome-Tests'
+	#category : 'Rhizome-Tests',
+	#package : 'Rhizome-Tests'
 }
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RhizomeTest >> localAddress [
 	^ '127.0.0.1'
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RhizomeTest >> nodeList [ 
 	^ { 
 		#node1 -> '127.0.0.1'. 
@@ -23,7 +24,7 @@ RhizomeTest >> nodeList [
 		}
 ]
 
-{ #category : #running }
+{ #category : 'running' }
 RhizomeTest >> setUp [ 
 	super setUp.
 	cluster := RZCluster new 
@@ -31,13 +32,13 @@ RhizomeTest >> setUp [
 		buildNodesFromList: self nodeList 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 RhizomeTest >> testAddVirtualNode [ 
 	cluster localNode addVirtualNodeWithPort: 10000.
 	self assert: cluster localNode virtualNodes size equals: 1
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 RhizomeTest >> testDispatchToVirtualNode [ 
 	| virtualNode targetNode |
 	cluster nodes do: [ :node | node addVirtualNodeWithPort: 10000 ].
@@ -46,7 +47,7 @@ RhizomeTest >> testDispatchToVirtualNode [
 	self assert: virtualNode equals: targetNode
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 RhizomeTest >> testResolveReplicaSet [
 	| set |
 	cluster nodes do: [ :node | node addVirtualNodeWithPort: 10000 ].
