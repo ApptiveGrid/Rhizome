@@ -1,6 +1,6 @@
 Class {
-	#name : 'RZLocalNode',
-	#superclass : 'RZNode',
+	#name : 'RZLocalHost',
+	#superclass : 'RZHost',
 	#instVars : [
 		'basePath',
 		'databaseLocator'
@@ -10,22 +10,22 @@ Class {
 }
 
 { #category : 'accessing' }
-RZLocalNode >> basePath [
+RZLocalHost >> basePath [
 	^ basePath
 ]
 
 { #category : 'accessing' }
-RZLocalNode >> basePath: aString [ 
+RZLocalHost >> basePath: aString [ 
 	basePath := aString asFileReference 
 ]
 
 { #category : 'as yet unclassified' }
-RZLocalNode >> cluster: aRZCluster [ 
+RZLocalHost >> cluster: aRZCluster [ 
 	cluster := aRZCluster 
 ]
 
 { #category : 'as yet unclassified' }
-RZLocalNode >> createDatabaseWithId: aString [ 
+RZLocalHost >> createDatabaseWithId: aString [ 
 	| path |
 	path := self databaseLocator pathForId: aString.
 	path exists ifTrue: [ Error signal: 'database already exists' ].
@@ -35,13 +35,13 @@ RZLocalNode >> createDatabaseWithId: aString [
 ]
 
 { #category : 'accessing' }
-RZLocalNode >> databaseLocator [
+RZLocalHost >> databaseLocator [
 	^ databaseLocator ifNil: [ 
 		databaseLocator := self defaultDatabaseLocator ]
 ]
 
 { #category : 'accessing' }
-RZLocalNode >> databaseWithId: aString [ 
+RZLocalHost >> databaseWithId: aString [ 
 	| path |
 	path := self databaseLocator pathForId: aString.
 	path exists ifFalse: [ Error signal: 'database not found at ', path printString ].
@@ -49,7 +49,7 @@ RZLocalNode >> databaseWithId: aString [
 ]
 
 { #category : 'accessing' }
-RZLocalNode >> databaseWithId: aString ifAbsent: aBlock [ 
+RZLocalHost >> databaseWithId: aString ifAbsent: aBlock [ 
 	| path |
 	path := self databaseLocator pathForId: aString.
 	^ path exists 
@@ -58,48 +58,48 @@ RZLocalNode >> databaseWithId: aString ifAbsent: aBlock [
 ]
 
 { #category : 'as yet unclassified' }
-RZLocalNode >> defaultDatabaseLocator [
+RZLocalHost >> defaultDatabaseLocator [
 	^ RZSimpleDatabaseLocator new
 		node: self;
 		yourself 
 ]
 
 { #category : 'testing' }
-RZLocalNode >> isLocalNode [
+RZLocalHost >> isLocalNode [
 	^ true
 ]
 
 { #category : 'as yet unclassified' }
-RZLocalNode >> localVirtualNode [
-	^ virtualNodes detect: [ :each | each isKindOf: RZLocalVirtualNode ]
+RZLocalHost >> localVirtualNode [
+	^ virtualNodes detect: [ :each | each isKindOf: RZLocalImage ]
 ]
 
 { #category : 'accessing' }
-RZLocalNode >> network [
+RZLocalHost >> network [
 	^ cluster network
 ]
 
 { #category : 'as yet unclassified' }
-RZLocalNode >> registerNode [
+RZLocalHost >> registerNode [
 	self network registerNode: self
 ]
 
 { #category : 'as yet unclassified' }
-RZLocalNode >> registerOnPort: anInteger [ 
+RZLocalHost >> registerOnPort: anInteger [ 
 	"create a REST server with the port and add a virtual node
 	with the same setting so we can know which virtual node we are"
 	| virtualNode |
-	virtualNode := RZLocalVirtualNode port: anInteger.
+	virtualNode := RZLocalImage port: anInteger.
 	self addVirtualNode: virtualNode.
 	(self network addressAt: address) at: anInteger put: virtualNode server 
 ]
 
 { #category : 'accessing' }
-RZLocalNode >> start [
+RZLocalHost >> start [
 	self server start
 ]
 
 { #category : 'accessing' }
-RZLocalNode >> stop [ 
+RZLocalHost >> stop [ 
 	self server stop
 ]

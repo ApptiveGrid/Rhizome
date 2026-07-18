@@ -1,10 +1,11 @@
 Class {
-	#name : #BaselineOfRhizome,
-	#superclass : #BaselineOf,
-	#category : #BaselineOfRhizome
+	#name : 'BaselineOfRhizome',
+	#superclass : 'BaselineOf',
+	#category : 'BaselineOfRhizome',
+	#package : 'BaselineOfRhizome'
 }
 
-{ #category : #baselines }
+{ #category : 'baselines' }
 BaselineOfRhizome >> baseline: spec [
 	<baseline>
 	spec
@@ -17,14 +18,15 @@ BaselineOfRhizome >> baseline: spec [
 				zinc: spec.
 			spec
 				package: 'Rhizome-Core' with: [ spec requires: #('NonCryptographicHashes' 'Gossip' 'Soil' 'ZincHTTPComponents') ];
-				package: 'Rhizome-Tests' with: [ spec requires: #('Rhizome-Core') ].
+				package: 'Rhizome-Simulator' with: [ spec requires: #('Rhizome-Core') ];
+				package: 'Rhizome-Tests' with: [ spec requires: #('Rhizome-Core' 'Rhizome-Simulator') ].
 
 			spec
 				group: 'default' with: #('Core');
-				group: 'Core' with: #('Rhizome-Core' 'Rhizome-Tests') ].
+				group: 'Core' with: #('Rhizome-Core' 'Rhizome-Simulator' 'Rhizome-Tests') ].
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : 'as yet unclassified' }
 BaselineOfRhizome >> gossip: spec [
 
 	spec baseline: 'Gossip' with: [ 
@@ -32,14 +34,14 @@ BaselineOfRhizome >> gossip: spec [
 			repository: 'github://ApptiveGrid/Gossip:main/source' ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : 'as yet unclassified' }
 BaselineOfRhizome >> murmur3: spec [ 
 	spec baseline: 'NonCryptographicHashes' with: [ 
 		spec 
 			repository: 'github://ApptiveGrid/pharo-non-cryptographic-hashes:master/src' ]
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 BaselineOfRhizome >> soil: spec [
 	
 	spec baseline: 'Soil' with: [ 
@@ -47,7 +49,7 @@ BaselineOfRhizome >> soil: spec [
 			repository: 'github://ApptiveGrid/Soil:main/src' ]
 ]
 
-{ #category : #baselines }
+{ #category : 'baselines' }
 BaselineOfRhizome >> zinc: spec [
 	spec baseline: 'ZincHTTPComponents' with: [ 
 		spec 

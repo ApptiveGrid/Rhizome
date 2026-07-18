@@ -24,9 +24,9 @@ RZSoilReplicateVisitor >> traverse [
 	| response |
 	response := self sendCommand: (RZInitializeDatabase new 
 		id: soil path basename;
-		databaseVersion: soil databaseVersion).
+		databaseVersion: soil control databaseVersion).
 	response isSuccess ifFalse: [ Error signal: 'nope' ].
-	super traverse: soil
+	self visitSoil: soil
 ]
 
 { #category : 'api' }
@@ -44,7 +44,7 @@ RZSoilReplicateVisitor >> visitDatabaseJournal: aSoilJournal [
 
 { #category : 'visiting' }
 RZSoilReplicateVisitor >> visitMetaSegment: aSoilMetaSegment [ 
-	^ aSoilMetaSegment 
+	^ super visitMetaSegment: aSoilMetaSegment
 ]
 
 { #category : 'visiting' }
@@ -55,6 +55,7 @@ RZSoilReplicateVisitor >> visitParameters: aSoilParameterFile [
 { #category : 'visiting' }
 RZSoilReplicateVisitor >> visitPersistentClusterVersion: aSoilPersistentClusterVersion [ 
 	| backupCluster |
+	super visitPersistentClusterVersion: aSoilPersistentClusterVersion.
 	backupCluster := aSoilPersistentClusterVersion copy
 		behaviorDescriptions: aSoilPersistentClusterVersion behaviorDescriptions;
 		references: aSoilPersistentClusterVersion references;
@@ -65,10 +66,7 @@ RZSoilReplicateVisitor >> visitPersistentClusterVersion: aSoilPersistentClusterV
 		objectId: aSoilPersistentClusterVersion objectId;
 		cluster: (ByteArray streamContents: [:stream |
 			stream nextPutAll: backupCluster serialize ])).
-	backupCluster references do: [ :reference |
-		self visit: reference ].
 	aSoilPersistentClusterVersion indexIds do:[ :indexId |
 		self processIndexId: indexId segment: aSoilPersistentClusterVersion segment ].
-
-	^ aSoilPersistentClusterVersion 
+	^ aSoilPersistentClusterVersion
 ]

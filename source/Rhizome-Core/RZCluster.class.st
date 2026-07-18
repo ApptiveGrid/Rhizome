@@ -5,7 +5,9 @@ Class {
 		'localAddress',
 		'nodes',
 		'placementStrategy',
-		'network'
+		'network',
+		'hostLeaseManager',
+		'ownershipStore'
 	],
 	#category : 'Rhizome-Core',
 	#package : 'Rhizome-Core'
@@ -27,13 +29,27 @@ RZCluster >> announceAll [
 RZCluster >> buildNodesFromList: aCollection [ 
 	aCollection do: [ :assoc | 
 		self addNode: ((assoc value = localAddress)
-			ifTrue: [  RZLocalNode name: assoc key address: assoc value ]
-			ifFalse: [ RZRemoteNode name: assoc key address: assoc value ]) ]
+			ifTrue: [  RZLocalHost name: assoc key address: assoc value ]
+			ifFalse: [ RZRemoteHost name: assoc key address: assoc value ]) ]
 ]
 
 { #category : 'as yet unclassified' }
 RZCluster >> defaultPlacementStrategy [
 	^ RZRendezvousHashingStrategy new 
+]
+
+{ #category : 'as yet unclassified' }
+RZCluster >> hostLeaseManager [
+	^ hostLeaseManager ifNil: [
+		hostLeaseManager := RZHostLeaseManager new
+			store: self ownershipStore;
+			selfHost: self localNode name;
+			yourself ]
+]
+
+{ #category : 'as yet unclassified' }
+RZCluster >> hostLeaseManager: aManager [
+	hostLeaseManager := aManager
 ]
 
 { #category : 'initialization' }
@@ -111,6 +127,17 @@ RZCluster >> nodes [
 { #category : 'accessing' }
 RZCluster >> nodes: aCollection [ 
 	nodes := aCollection 
+]
+
+{ #category : 'as yet unclassified' }
+RZCluster >> ownershipStore [
+	^ ownershipStore ifNil: [
+		ownershipStore := RZInMemoryOwnershipStore new ]
+]
+
+{ #category : 'as yet unclassified' }
+RZCluster >> ownershipStore: aStore [
+	ownershipStore := aStore
 ]
 
 { #category : 'as yet unclassified' }

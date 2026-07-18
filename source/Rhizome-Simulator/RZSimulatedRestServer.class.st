@@ -1,13 +1,14 @@
 Class {
-	#name : #RZSimulatedRestServer,
-	#superclass : #Object,
+	#name : 'RZSimulatedRestServer',
+	#superclass : 'Object',
 	#instVars : [
 		'virtualNode'
 	],
-	#category : #'Rhizome-Simulator'
+	#category : 'Rhizome-Simulator',
+	#package : 'Rhizome-Simulator'
 }
 
-{ #category : #running }
+{ #category : 'running' }
 RZSimulatedRestServer >> apiHandler [ 
 	^ RZRestServerDelegate new 
 		virtualNode: virtualNode;
@@ -15,22 +16,22 @@ RZSimulatedRestServer >> apiHandler [
 			rootClass: RZRestCall)
 ]
 
-{ #category : #running }
+{ #category : 'running' }
 RZSimulatedRestServer >> apiPrefix [
 	^ #cluster
 ]
 
-{ #category : #'public - layout' }
+{ #category : 'public - layout' }
 RZSimulatedRestServer >> cluster [
 	^ virtualNode cluster 
 ]
 
-{ #category : #options }
+{ #category : 'options' }
 RZSimulatedRestServer >> debugMode [
 	^ true
 ]
 
-{ #category : #public }
+{ #category : 'public' }
 RZSimulatedRestServer >> handleRequest: aZnRequest [
 	^ ZnCurrentServer
 		value: self
@@ -39,7 +40,7 @@ RZSimulatedRestServer >> handleRequest: aZnRequest [
 
 ]
 
-{ #category : #running }
+{ #category : 'running' }
 RZSimulatedRestServer >> handler [ 
 	| handler |
 	handler := ZnPrefixMappingDelegate new
@@ -47,17 +48,17 @@ RZSimulatedRestServer >> handler [
 	^ handler
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZSimulatedRestServer >> port [
 	^ virtualNode port
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZSimulatedRestServer >> virtualNode [
 	^ virtualNode
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZSimulatedRestServer >> virtualNode: aRZLocalNode [ 
 	virtualNode := aRZLocalNode 
 ]

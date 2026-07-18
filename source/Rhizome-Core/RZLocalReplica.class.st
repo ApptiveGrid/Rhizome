@@ -23,14 +23,24 @@ RZLocalReplica >> databaseVersion [
 { #category : 'as yet unclassified' }
 RZLocalReplica >> doInitialSync: remote [
 	RZSoilReplicateVisitor new 
-		socket: (ZnWebSocket to: 'ws://', remote address ,':', remote port asString ,'/ws');
+		socket: (self replicaSet cluster network newWebSocketTo: remote address port: remote port);
 		soil: soil;
-		traverse 
+		traverse
 ]
 
 { #category : 'accessing' }
 RZLocalReplica >> id [
 	^ soil path basename
+]
+
+{ #category : 'as yet unclassified' }
+RZLocalReplica >> isStale [
+	^ state = #stale
+]
+
+{ #category : 'as yet unclassified' }
+RZLocalReplica >> markStale [
+	state := #stale
 ]
 
 { #category : 'instance creation' }
@@ -60,6 +70,16 @@ RZLocalReplica >> soil [
 RZLocalReplica >> soil: aSoil [ 
 	soil := aSoil.
 	soil notificationHandler: self notificationHandler
+]
+
+{ #category : 'as yet unclassified' }
+RZLocalReplica >> state [
+	^ state
+]
+
+{ #category : 'as yet unclassified' }
+RZLocalReplica >> state: aSymbol [
+	state := aSymbol
 ]
 
 { #category : 'accessing' }

@@ -80,11 +80,6 @@ RZSimulatedTest >> tearDown [
 ]
 
 { #category : 'tests' }
-RZSimulatedTest >> testDummy [ 
-	self halt.
-]
-
-{ #category : 'tests' }
 RZSimulatedTest >> testResolveReplicaSet [
 	| set db txn virtualNode |
 	virtualNode := ((network addressAt: '127.0.0.1') at: 5555) virtualNode.
@@ -95,6 +90,9 @@ RZSimulatedTest >> testResolveReplicaSet [
 	txn root: Dictionary new.
 	txn commit.
 	set start.
-	self halt.
-	
+	set remoteReplicas do: [ :remote |
+		| status |
+		status := set endpointStatusAt: remote.
+		self assert: status notNil.
+		self assert: status databaseVersion equals: set localReplica databaseVersion ]
 ]

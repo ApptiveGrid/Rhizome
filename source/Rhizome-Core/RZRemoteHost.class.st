@@ -1,11 +1,11 @@
 Class {
-	#name : 'RZRemoteNode',
-	#superclass : 'RZNode',
+	#name : 'RZRemoteHost',
+	#superclass : 'RZHost',
 	#category : 'Rhizome-Core',
 	#package : 'Rhizome-Core'
 }
 
 { #category : 'testing' }
-RZRemoteNode >> isLocalNode [
+RZRemoteHost >> isLocalNode [
 	^ false
 ]

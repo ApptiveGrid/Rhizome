@@ -1,10 +1,11 @@
 Class {
-	#name : #RZClusterSimulationBuilder,
-	#superclass : #Object,
-	#category : #'Rhizome-Simulator'
+	#name : 'RZClusterSimulationBuilder',
+	#superclass : 'Object',
+	#category : 'Rhizome-Simulator',
+	#package : 'Rhizome-Simulator'
 }
 
-{ #category : #'instance creation' }
+{ #category : 'instance creation' }
 RZClusterSimulationBuilder >> build: cluster [ 
 	| network |
 	network := RZSimulatedNetwork new. 

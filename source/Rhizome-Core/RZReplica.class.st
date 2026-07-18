@@ -31,6 +31,11 @@ RZReplica >> printOn: aStream [
 ]
 
 { #category : 'as yet unclassified' }
+RZReplica >> replicaSet [
+	^ replicaSet
+]
+
+{ #category : 'as yet unclassified' }
 RZReplica >> replicaSet: aRZReplicaSet [ 
 	replicaSet := aRZReplicaSet 
 ]

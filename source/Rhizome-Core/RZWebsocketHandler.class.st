@@ -36,8 +36,14 @@ RZWebsocketHandler >> endpoint: anEndpoint [
 
 { #category : 'accessing' }
 RZWebsocketHandler >> handleMessage: message [
-	| command |
-	command := message materialize.
+	| command stream typeCode commandClass |
+	command := message isString
+		ifTrue: [ STON fromString: message ]
+		ifFalse: [
+			stream := ReadStream on: message.
+			typeCode := stream next.
+			commandClass := RZBinaryCommand withType: typeCode.
+			commandClass new readFrom: stream ].
 	command executeIn: self.
 	^ STON toString: RZSuccess new
 ]
