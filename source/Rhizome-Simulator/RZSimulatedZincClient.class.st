@@ -1,40 +1,41 @@
 Class {
-	#name : #RZSimulatedZincClient,
-	#superclass : #Object,
+	#name : 'RZSimulatedZincClient',
+	#superclass : 'Object',
 	#instVars : [
 		'url',
 		'network',
 		'response',
 		'entity'
 	],
-	#category : #'Rhizome-Simulator'
+	#category : 'Rhizome-Simulator',
+	#package : 'Rhizome-Simulator'
 }
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZSimulatedZincClient >> entity: aZnByteArrayEntity [ 
 	entity := aZnByteArrayEntity  
 ]
 
-{ #category : #public }
+{ #category : 'public' }
 RZSimulatedZincClient >> get [
 	| targetVirtualNode |
 	targetVirtualNode := (network virtualNodeWithAddress: url host port: url port).
 	response := targetVirtualNode handleRequest: (self request method: #GET) 
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZSimulatedZincClient >> network: aRZSimulatedNetwork [ 
 	network := aRZSimulatedNetwork 
 ]
 
-{ #category : #public }
+{ #category : 'public' }
 RZSimulatedZincClient >> post [
 	| targetVirtualNode |
 	targetVirtualNode := (network virtualNodeWithAddress: url host port: url port).
 	response := targetVirtualNode handleRequest: (self request method: #POST ) 
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZSimulatedZincClient >> request [
 	| request |
 	request := ZnRequest empty 
@@ -45,12 +46,12 @@ RZSimulatedZincClient >> request [
 	^ request 
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZSimulatedZincClient >> response [
 	^ response
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 RZSimulatedZincClient >> url: aZnUrl [ 
 	url := aZnUrl 
 ]

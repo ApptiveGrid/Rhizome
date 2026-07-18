@@ -21,7 +21,7 @@ RZWriteCluster >> cluster: aCollection [
 
 { #category : 'as yet unclassified' }
 RZWriteCluster >> executeIn: handler [ 
-	handler database objectRepository at: objectId put: cluster.
+	handler database objectRepository at: objectId putBytes: cluster.
 	^ RZSuccess new
 ]
 

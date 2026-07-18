@@ -26,7 +26,7 @@ RZInitializeDatabase >> executeIn: aHandler [
 	| database |
 	database := (aHandler endpoint createDatabaseWithId: id).
 	aHandler database: database.
-	database databaseVersion: databaseVersion.
+	database control databaseVersion: databaseVersion.
 	^ RZSuccess new
 ]
 

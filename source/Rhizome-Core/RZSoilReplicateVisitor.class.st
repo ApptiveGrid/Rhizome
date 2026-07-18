@@ -24,9 +24,9 @@ RZSoilReplicateVisitor >> traverse [
 	| response |
 	response := self sendCommand: (RZInitializeDatabase new 
 		id: soil path basename;
-		databaseVersion: soil databaseVersion).
+		databaseVersion: soil control databaseVersion).
 	response isSuccess ifFalse: [ Error signal: 'nope' ].
-	super traverse: soil
+	self visitSoil: soil
 ]
 
 { #category : 'api' }

@@ -100,5 +100,5 @@ RZRestServer >> stop [
 
 { #category : 'running' }
 RZRestServer >> websocketHandler [
-	^ ZnWebSocketDelegate handler: (RZWebsocketHandler new node: self node)
+	^ ZnWebSocketDelegate handler: (RZWebsocketHandler new endpoint: self node)
 ]
