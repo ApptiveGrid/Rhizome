@@ -29,14 +29,6 @@ RZSoilReplicateVisitor >> traverse [
 	self visitSoil: soil
 ]
 
-{ #category : 'api' }
-RZSoilReplicateVisitor >> traverse: aSoil [ 
-	| response |
-	response := self sendCommand: (RZInitializeDatabase new id: soil id).
-	super traverse: aSoil.
-	self halt.
-]
-
 { #category : 'visiting' }
 RZSoilReplicateVisitor >> visitDatabaseJournal: aSoilJournal [ 
 	^ aSoilJournal 
