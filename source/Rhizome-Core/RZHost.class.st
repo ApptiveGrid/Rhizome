@@ -82,8 +82,7 @@ RZHost >> name: aString [
 ]
 
 { #category : 'accessing' }
-RZHost >> portAt: aNumber [ 
-self halt.
+RZHost >> portAt: aNumber [
 	^ virtualNodes detect: [ :each | each port = aNumber  ]
 ]
 
