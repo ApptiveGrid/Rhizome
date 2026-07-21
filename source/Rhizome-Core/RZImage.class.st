@@ -28,7 +28,8 @@ RZImage >> cluster [
 
 { #category : 'as yet unclassified' }
 RZImage >> handlesKey: aString [ 
-	^ false
+	^ (node resolveNodeForKey: aString) == node
+		and: [ (node resolveVirtualNodeForKey: aString) == self ]
 ]
 
 { #category : 'testing' }

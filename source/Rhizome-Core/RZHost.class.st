@@ -100,8 +100,11 @@ RZHost >> resolveNodeForKey: aString [
 
 { #category : 'as yet unclassified' }
 RZHost >> resolveVirtualNodeForKey: aString [ 
+	| hashes |
 	virtualNodes ifEmpty: [ Error signal: 'node ', name , ' has no virtual nodes' ].
-	^ virtualNodes anyOne
+	hashes := virtualNodes collect: [ :each | 
+		(NCHMurmur3 withSeed: 0) hash: (each port asString, aString) asByteArray ].
+	^ virtualNodes at: (hashes indexOf: hashes sorted last)
 ]
 
 { #category : 'adding' }

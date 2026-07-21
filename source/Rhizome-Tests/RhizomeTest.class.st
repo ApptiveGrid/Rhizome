@@ -47,6 +47,20 @@ RhizomeTest >> testDispatchToVirtualNode [
 	self assert: virtualNode equals: targetNode
 ]
 
+{ #category : 'as yet unclassified' }
+RhizomeTest >> testHandlesKeyDistinguishesImagesOnSameAndOtherHosts [
+	| winnerHost winnerImage otherImageSameHost otherHost otherHostImage |
+	cluster nodes do: [ :node | node addVirtualNodeWithPort: 10000; addVirtualNodeWithPort: 20000 ].
+	winnerHost := cluster nodeNameForKey: 'db-1'.
+	winnerImage := winnerHost resolveVirtualNodeForKey: 'db-1'.
+	otherImageSameHost := winnerHost virtualNodes detect: [ :each | each ~~ winnerImage ].
+	otherHost := cluster nodes detect: [ :each | each ~~ winnerHost ].
+	otherHostImage := otherHost virtualNodes first.
+	self assert: (winnerImage handlesKey: 'db-1').
+	self deny: (otherImageSameHost handlesKey: 'db-1').
+	self deny: (otherHostImage handlesKey: 'db-1')
+]
+
 { #category : 'tests' }
 RhizomeTest >> testResolveReplicaSet [
 	| set |
@@ -54,4 +68,15 @@ RhizomeTest >> testResolveReplicaSet [
 	set := cluster replicaSetForKey: '012345'.
 	self assert: set size equals: 3.
 	self assert: cluster nodes first equals: cluster localNode
+]
+
+{ #category : 'as yet unclassified' }
+RhizomeTest >> testResolveVirtualNodeForKeyIsDeterministicAndUsesBothImages [
+	| host imageCounts keys |
+	cluster nodes do: [ :node | node addVirtualNodeWithPort: 10000; addVirtualNodeWithPort: 20000 ].
+	host := cluster localNode.
+	keys := (1 to: 30) collect: [ :i | 'db-', i printString ].
+	self assert: (keys allSatisfy: [ :k | (host resolveVirtualNodeForKey: k) == (host resolveVirtualNodeForKey: k) ]).
+	imageCounts := (keys collect: [ :k | (host resolveVirtualNodeForKey: k) port ]) asSet.
+	self assert: imageCounts size equals: 2
 ]
