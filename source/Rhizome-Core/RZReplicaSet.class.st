@@ -47,6 +47,13 @@ RZReplicaSet >> handleRemoteAheadOf: remote status: status [
 			self localReplica markStale ]
 ]
 
+{ #category : 'as yet unclassified' }
+RZReplicaSet >> handleUnreachable: remote error: anError [
+	Transcript
+		show: 'Replica unreachable, skipping this sync round: ', remote printString, ' (', anError messageText, ')';
+		cr
+]
+
 { #category : 'initialization' }
 RZReplicaSet >> initialize [ 
 	super initialize.
@@ -101,20 +108,25 @@ RZReplicaSet >> size [
 
 { #category : 'accessing' }
 RZReplicaSet >> start [
-	| memberStatus |
-	memberStatus := (self remoteReplicas collect: [ :each | 
-		each -> (self endpointStatusAt: each)  ]) asDictionary.
-	memberStatus keysAndValuesDo: [ :remote :status |
-		status 
-			ifNotNil: [ 
-				(self localReplica databaseVersion = status databaseVersion) ifFalse: [ 
-					(self localReplica databaseVersion > status databaseVersion)
-						ifTrue: [ 
-								self localReplica 
-									syncTransactionJournalsFrom: status databaseVersion 
-									to: self localReplica databaseVersion
-									target: remote  ]
-						ifFalse: [ self handleRemoteAheadOf: remote status: status ] ] ]
-			ifNil: [ self localReplica doInitialSync: remote ]
-		 ]
+	self remoteReplicas do: [ :remote |
+		[ self syncWith: remote ]
+			on: NetworkError
+			do: [ :error | self handleUnreachable: remote error: error ] ]
+]
+
+{ #category : 'as yet unclassified' }
+RZReplicaSet >> syncWith: remote [
+	| status |
+	status := self endpointStatusAt: remote.
+	status
+		ifNotNil: [
+			(self localReplica databaseVersion = status databaseVersion) ifFalse: [
+				(self localReplica databaseVersion > status databaseVersion)
+					ifTrue: [
+							self localReplica
+								syncTransactionJournalsFrom: status databaseVersion
+								to: self localReplica databaseVersion
+								target: remote ]
+					ifFalse: [ self handleRemoteAheadOf: remote status: status ] ] ]
+		ifNil: [ self localReplica doInitialSync: remote ]
 ]

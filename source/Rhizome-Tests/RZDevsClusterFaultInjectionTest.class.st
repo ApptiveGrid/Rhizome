@@ -64,14 +64,16 @@ RZDevsClusterFaultInjectionTest >> tearDown [
 ]
 
 { #category : 'as yet unclassified' }
-RZDevsClusterFaultInjectionTest >> testInitialSyncFailsWhenPrimaryIsPartitionedFromReplica [
+RZDevsClusterFaultInjectionTest >> testInitialSyncSkipsUnreachableReplicaWithoutRaising [
 	| primary set remote |
-	primary := self primaryClusterForKey: 'db-2'.
-	set := primary replicaSetForKey: 'db-2'.
+	primary := self primaryClusterForKey: 'db-4'.
+	set := primary replicaSetForKey: 'db-4'.
 	self writeInitialCommitFor: set.
 	remote := set remoteReplicas first.
 	router simulateNetworkPartition: primary localNode address and: remote address.
-	self should: [ set start ] raise: ConnectionClosed
+	set start.
+	router healPartition: primary localNode address and: remote address.
+	self assert: (set endpointStatusAt: remote) isNil
 ]
 
 { #category : 'as yet unclassified' }
@@ -106,6 +108,21 @@ RZDevsClusterFaultInjectionTest >> testInitialSyncSucceedsWithoutPartition [
 RZDevsClusterFaultInjectionTest >> testSetUpBuildsFiveClusters [
 	self assert: clusters size equals: 5.
 	self assert: ((self clusterAt: '127.0.0.1') isKindOf: RZCluster)
+]
+
+{ #category : 'as yet unclassified' }
+RZDevsClusterFaultInjectionTest >> testUnreachableReplicaDoesNotBlockOtherReplicas [
+	| primary set unreachable reachable |
+	primary := self primaryClusterForKey: 'db-5'.
+	set := primary replicaSetForKey: 'db-5'.
+	self writeInitialCommitFor: set.
+	unreachable := set remoteReplicas first.
+	reachable := set remoteReplicas second.
+	router simulateNetworkPartition: primary localNode address and: unreachable address.
+	set start.
+	self assert: (set endpointStatusAt: reachable) databaseVersion equals: set localReplica databaseVersion.
+	router healPartition: primary localNode address and: unreachable address.
+	self assert: (set endpointStatusAt: unreachable) isNil
 ]
 
 { #category : 'as yet unclassified' }
