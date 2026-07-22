@@ -8,6 +8,7 @@ Class {
 { #category : 'baselines' }
 BaselineOfRhizome >> baseline: spec [
 	<baseline>
+	self pharoDevs: spec.
 	spec
 		for: #common
 		do: [ 
@@ -18,12 +19,12 @@ BaselineOfRhizome >> baseline: spec [
 				zinc: spec.
 			spec
 				package: 'Rhizome-Core' with: [ spec requires: #('NonCryptographicHashes' 'Gossip' 'Soil' 'ZincHTTPComponents') ];
-				package: 'Rhizome-Simulator' with: [ spec requires: #('Rhizome-Core') ];
+				package: 'Rhizome-Simulator' with: [ spec requires: #('Rhizome-Core' 'PharoDEVS') ];
 				package: 'Rhizome-Tests' with: [ spec requires: #('Rhizome-Core' 'Rhizome-Simulator') ].
 
 			spec
 				group: 'default' with: #('Core');
-				group: 'Core' with: #('Rhizome-Core' 'Rhizome-Simulator' 'Rhizome-Tests') ].
+				group: 'Core' with: #('Rhizome-Core' 'Rhizome-Simulator' 'Rhizome-Tests') ]
 ]
 
 { #category : 'as yet unclassified' }
@@ -39,6 +40,15 @@ BaselineOfRhizome >> murmur3: spec [
 	spec baseline: 'NonCryptographicHashes' with: [ 
 		spec 
 			repository: 'github://ApptiveGrid/pharo-non-cryptographic-hashes:master/src' ]
+]
+
+{ #category : 'as yet unclassified' }
+BaselineOfRhizome >> pharoDevs: spec [
+
+	spec
+		baseline: 'PharoDEVS' with: [ 
+			spec 
+				repository: 'github://ApptiveGrid/PharoDEVS:main/source' ]
 ]
 
 { #category : 'accessing' }
