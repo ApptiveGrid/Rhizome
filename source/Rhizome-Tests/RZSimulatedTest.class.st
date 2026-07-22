@@ -10,36 +10,8 @@ Class {
 }
 
 { #category : 'accessing' }
-RZSimulatedTest >> buildCluster [
-	^ RZCluster new 
-		localAddress: self localAddress;
-		buildNodesFromList: self nodeList
-		 
-]
-
-{ #category : 'accessing' }
-RZSimulatedTest >> buildClusters [
-	^ RZCluster new 
-		localAddress: self localAddress;
-		buildNodesFromList: self nodeList
-		 
-]
-
-{ #category : 'as yet unclassified' }
-RZSimulatedTest >> buildNetwork [ 
-	^ RZClusterSimulationBuilder new 
-		build: self cluster
-]
-
-{ #category : 'accessing' }
 RZSimulatedTest >> localAddress [
 	^ '127.0.0.1'
-]
-
-{ #category : 'accessing' }
-RZSimulatedTest >> network [
-	^ network ifNil: [ 
-		network := self buildNetwork  ]
 ]
 
 { #category : 'accessing' }
