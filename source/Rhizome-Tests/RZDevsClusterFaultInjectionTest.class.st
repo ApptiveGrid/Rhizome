@@ -58,9 +58,37 @@ RZDevsClusterFaultInjectionTest >> setUp [
 ]
 
 { #category : 'as yet unclassified' }
+RZDevsClusterFaultInjectionTest >> shareOwnershipStoreWithShortLease [
+	| store |
+	store := RZInMemoryOwnershipStore new.
+	clusters do: [ :cluster |
+		cluster ownershipStore: store.
+		cluster hostLeaseManager
+			leaseDuration: 100 milliSeconds;
+			renewInterval: 20 milliSeconds;
+			safetyMargin: 10 milliSeconds ].
+	^ store
+]
+
+{ #category : 'as yet unclassified' }
 RZDevsClusterFaultInjectionTest >> tearDown [
 	super tearDown.
 	'rhizome-devs' asFileReference ensureDeleteAll
+]
+
+{ #category : 'as yet unclassified' }
+RZDevsClusterFaultInjectionTest >> testCrashedPrimaryLeaseExpiresAndRivalCanPromote [
+	| hostA hostB |
+	self shareOwnershipStoreWithShortLease.
+	hostA := clusters first.
+	hostB := clusters second.
+	self assert: (hostA hostLeaseManager tryPromoteFor: #lease1) notNil.
+	self assert: (hostA hostLeaseManager isWritableFor: #lease1).
+	(Delay forMilliseconds: 150) wait. "hostA never renews again - simulates a crash"
+	self assert: (hostB hostLeaseManager tryPromoteFor: #lease1) notNil.
+	self assert: (hostB hostLeaseManager isWritableFor: #lease1).
+	self deny: (hostA hostLeaseManager renewFor: #lease1) notNil.
+	self deny: (hostA hostLeaseManager isWritableFor: #lease1)
 ]
 
 { #category : 'as yet unclassified' }
@@ -102,6 +130,38 @@ RZDevsClusterFaultInjectionTest >> testInitialSyncSucceedsWithoutPartition [
 		status := set endpointStatusAt: remote.
 		self assert: status notNil.
 		self assert: status databaseVersion equals: set localReplica databaseVersion ]
+]
+
+{ #category : 'as yet unclassified' }
+RZDevsClusterFaultInjectionTest >> testPartitionDoesNotAffectLeaseRenewal [
+	"The ownership store models a shared, always-reachable authority (NFS in
+	production), not a peer reachable only through the replicated data plane -
+	so a primary partitioned from its replica peers keeps renewing its lease
+	just fine. Only replication/initial-sync (see the other tests in this
+	class) is affected by a network partition, not lease renewal itself."
+	| hostA hostB |
+	self shareOwnershipStoreWithShortLease.
+	hostA := clusters first.
+	hostB := clusters second.
+	hostA hostLeaseManager tryPromoteFor: #lease2.
+	router simulateNetworkPartition: hostA localNode address and: hostB localNode address.
+	self assert: (hostA hostLeaseManager renewFor: #lease2) notNil.
+	self assert: (hostA hostLeaseManager isWritableFor: #lease2)
+]
+
+{ #category : 'as yet unclassified' }
+RZDevsClusterFaultInjectionTest >> testRequestRouterForwardsToNewPrimaryAfterPromotion [
+	| hostA hostB requestRouter decision |
+	self shareOwnershipStoreWithShortLease.
+	hostA := clusters first.
+	hostB := clusters second.
+	hostA hostLeaseManager tryPromoteFor: #lease3.
+	(Delay forMilliseconds: 150) wait.
+	hostB hostLeaseManager tryPromoteFor: #lease3.
+	requestRouter := RZRequestRouter new cluster: hostA.
+	decision := requestRouter resolveFor: #lease3.
+	self assert: decision isForward.
+	self assert: decision targetImage node address equals: hostB localNode address
 ]
 
 { #category : 'as yet unclassified' }
