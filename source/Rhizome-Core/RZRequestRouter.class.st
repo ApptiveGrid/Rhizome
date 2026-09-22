@@ -57,12 +57,14 @@ RZRequestRouter >> resolveFor: dbId [
 	"Core routing decision - see Rhizome spec.md Request Routing & Primary-Findung.
 	No probing of remote candidates needed anymore: the ownership store is the
 	single shared source of truth, so we can just read it directly instead of
-	asking candidates in Rendezvous order whether they think they are primary."
+	asking candidates in Rendezvous order whether they think they are primary.
+	Time is read from this host's lease manager, not from DateAndTime directly -
+	the router runs in the image of its host and must judge by the same clock."
 	| record promoted winner |
 	(cluster hostLeaseManager isWritableFor: dbId) ifTrue: [ ^ RZRoutingDecision local ].
 
 	record := cluster ownershipStore read: dbId.
-	(record notNil and: [ record leaseUntil > DateAndTime now ])
+	(record notNil and: [ record leaseUntil > cluster hostLeaseManager clock now ])
 		ifTrue: [ ^ RZRoutingDecision forward: (self imageForHostNamed: record primaryHost key: dbId) ].
 
 	(self isEligibleCandidateFor: dbId)

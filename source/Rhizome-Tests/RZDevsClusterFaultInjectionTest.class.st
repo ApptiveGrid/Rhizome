@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'router',
 		'sharedAddresses',
-		'clusters'
+		'clusters',
+		'clock'
 	],
 	#category : 'Rhizome-Tests',
 	#package : 'Rhizome-Tests'
@@ -59,11 +60,17 @@ RZDevsClusterFaultInjectionTest >> setUp [
 
 { #category : 'as yet unclassified' }
 RZDevsClusterFaultInjectionTest >> shareOwnershipStoreWithShortLease [
+	"Wire every cluster to one store and one clock. The clock is shared here
+	because these tests are about expiry, not about skew - the seam allows a
+	separate clock per reader, and that is what a later skew test will use."
 	| store |
 	store := RZInMemoryOwnershipStore new.
+	clock := RZManualClock new.
+	store clock: clock.
 	clusters do: [ :cluster |
 		cluster ownershipStore: store.
 		cluster hostLeaseManager
+			clock: clock;
 			leaseDuration: 100 milliSeconds;
 			renewInterval: 20 milliSeconds;
 			safetyMargin: 10 milliSeconds ].
@@ -84,7 +91,7 @@ RZDevsClusterFaultInjectionTest >> testCrashedPrimaryLeaseExpiresAndRivalCanProm
 	hostB := clusters second.
 	self assert: (hostA hostLeaseManager tryPromoteFor: #lease1) notNil.
 	self assert: (hostA hostLeaseManager isWritableFor: #lease1).
-	(Delay forMilliseconds: 150) wait. "hostA never renews again - simulates a crash"
+	clock advanceBy: 150 milliSeconds. "hostA never renews again - simulates a crash"
 	self assert: (hostB hostLeaseManager tryPromoteFor: #lease1) notNil.
 	self assert: (hostB hostLeaseManager isWritableFor: #lease1).
 	self deny: (hostA hostLeaseManager renewFor: #lease1) notNil.
@@ -156,7 +163,7 @@ RZDevsClusterFaultInjectionTest >> testRequestRouterForwardsToNewPrimaryAfterPro
 	hostA := clusters first.
 	hostB := clusters second.
 	hostA hostLeaseManager tryPromoteFor: #lease3.
-	(Delay forMilliseconds: 150) wait.
+	clock advanceBy: 150 milliSeconds.
 	hostB hostLeaseManager tryPromoteFor: #lease3.
 	requestRouter := RZRequestRouter new cluster: hostA.
 	decision := requestRouter resolveFor: #lease3.
