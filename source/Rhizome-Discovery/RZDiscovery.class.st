@@ -61,6 +61,25 @@ RZDiscovery >> includesMember: aGossipEndpoint [
 ]
 
 { #category : 'accessing' }
+RZDiscovery >> lastSeen: aGossipEndpoint [
+	"When this image last saw that member's own heartbeat move forward, or nil
+	while nothing has ever been heard from it. That difference is the point: it
+	separates 'never heard of' from 'heard of long ago'.
+
+	Handed out without judgement. Whether a member is gone is not decided here -
+	that stays with the lease manager until there is a failure detector of its own
+	(Entscheidung 4, Rhizome decisions of 2026-09-22).
+
+	One limit of the layer below, measured on 2026-09-22: a heartbeat only ever
+	arrives from the member itself. Gossip relays what it knows about a third
+	party once, on first contact, and never again, so for a member this image does
+	not talk to directly the timestamp stops at the moment it was first heard of.
+	With every image seeding every other - the deployment that is planned - all
+	members are talked to directly and the question does not arise."
+	^ (gossiper endpoints endpointStateAt: aGossipEndpoint ifAbsent: [ ^ nil ]) lastSeen
+]
+
+{ #category : 'accessing' }
 RZDiscovery >> localMember [
 	^ gossiper localEndpoint
 ]
