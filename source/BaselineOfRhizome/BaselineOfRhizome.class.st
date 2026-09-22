@@ -18,13 +18,16 @@ BaselineOfRhizome >> baseline: spec [
 				soil: spec;
 				zinc: spec.
 			spec
+				package: 'Rhizome-Discovery' with: [ spec requires: #('Gossip') ];
+				package: 'Rhizome-Discovery-Tests' with: [ spec requires: #('Rhizome-Discovery') ];
 				package: 'Rhizome-Core' with: [ spec requires: #('NonCryptographicHashes' 'Gossip' 'Soil' 'ZincHTTPComponents') ];
 				package: 'Rhizome-Simulator' with: [ spec requires: #('Rhizome-Core' 'PharoDEVS') ];
 				package: 'Rhizome-Tests' with: [ spec requires: #('Rhizome-Core' 'Rhizome-Simulator') ].
 
 			spec
-				group: 'default' with: #('Core');
-				group: 'Core' with: #('Rhizome-Core' 'Rhizome-Simulator' 'Rhizome-Tests') ]
+				group: 'default' with: #('Core' 'Discovery');
+				group: 'Core' with: #('Rhizome-Core' 'Rhizome-Simulator' 'Rhizome-Tests');
+				group: 'Discovery' with: #('Rhizome-Discovery' 'Rhizome-Discovery-Tests') ]
 ]
 
 { #category : 'as yet unclassified' }
