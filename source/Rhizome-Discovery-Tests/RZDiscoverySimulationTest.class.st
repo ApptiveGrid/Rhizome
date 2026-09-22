@@ -15,8 +15,8 @@ Class {
 		'router',
 		'nodes'
 	],
-	#category : 'Rhizome-Discovery-Simulation-Tests',
-	#package : 'Rhizome-Discovery-Simulation-Tests'
+	#category : 'Rhizome-Discovery-Tests',
+	#package : 'Rhizome-Discovery-Tests'
 }
 
 { #category : 'running' }
