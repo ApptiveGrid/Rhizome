@@ -44,7 +44,7 @@ BaselineOfRhizome >> gossip: spec [
 
 	spec baseline: 'Gossip' with: [ 
 		spec 
-			repository: 'github://ApptiveGrid/Gossip:main/source' ]
+			repository: 'github://soil-fabric/Gossip:main/source' ]
 ]
 
 { #category : 'as yet unclassified' }
