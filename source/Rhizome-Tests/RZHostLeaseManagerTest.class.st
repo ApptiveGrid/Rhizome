@@ -56,10 +56,13 @@ RZHostLeaseManagerTest >> testLosingOwnershipDemotesImmediately [
 
 { #category : 'as yet unclassified' }
 RZHostLeaseManagerTest >> testRenewExtendsWriteWindow [
-	| before after |
+	| manualClock before after |
+	manualClock := RZManualClock new.
+	manager clock: manualClock.
+	store clock: manualClock.
 	manager tryPromoteFor: #db1.
 	before := manager writeAllowedUntilFor: #db1.
-	(Delay forMilliseconds: 5) wait.
+	manualClock advanceBy: 1 second.
 	manager renewFor: #db1.
 	after := manager writeAllowedUntilFor: #db1.
 	self assert: after > before

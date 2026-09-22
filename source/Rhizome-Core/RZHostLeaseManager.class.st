@@ -10,7 +10,8 @@ Class {
 		'renewInterval',
 		'safetyMargin',
 		'process',
-		'running'
+		'running',
+		'clock'
 	],
 	#category : 'Rhizome-Core',
 	#package : 'Rhizome-Core'
@@ -27,6 +28,21 @@ RZHostLeaseManager >> cachedRecordFor: dbId [
 ]
 
 { #category : 'as yet unclassified' }
+RZHostLeaseManager >> clock [
+	"The source of 'now' for every lease comparison this manager makes.
+	Defaults to the DateAndTime class itself, which already answers #now -
+	in production no extra object is involved. A test injects a clock it
+	controls; each time reader holds its own, which is what makes clock
+	skew between hosts representable at all."
+	^ clock
+]
+
+{ #category : 'as yet unclassified' }
+RZHostLeaseManager >> clock: aClock [
+	clock := aClock
+]
+
+{ #category : 'as yet unclassified' }
 RZHostLeaseManager >> dropCachedRecordFor: dbId [
 	semaphore critical: [ records removeKey: dbId ifAbsent: [ nil ] ]
 ]
@@ -39,6 +55,7 @@ RZHostLeaseManager >> initialize [
 	leaseDuration := 15 seconds.
 	renewInterval := 5 seconds.
 	safetyMargin := 2 seconds.
+	clock := DateAndTime.
 	running := false
 ]
 
@@ -49,7 +66,7 @@ RZHostLeaseManager >> isWritableFor: dbId [
 	record ifNil: [ ^ false ].
 	record primaryHost = selfHost ifFalse: [ ^ false ].
 	until := self writeAllowedUntilFor: dbId.
-	^ DateAndTime now < until
+	^ clock now < until
 ]
 
 { #category : 'as yet unclassified' }
@@ -87,7 +104,7 @@ RZHostLeaseManager >> renewFor: dbId [
 	current := self cachedRecordFor: dbId.
 	current ifNil: [ ^ nil ].
 	updated := current copy.
-	updated leaseUntil: (DateAndTime now + leaseDuration).
+	updated leaseUntil: (clock now + leaseDuration).
 	result := store tryRenew: updated.
 	result
 		ifNotNil: [ self cacheRecord: result ]
@@ -155,7 +172,7 @@ RZHostLeaseManager >> tryPromoteFor: dbId [
 		dbId: dbId
 		primaryHost: selfHost
 		epoch: (observed ifNil: [ 0 ] ifNotNil: [ observed epoch ])
-		leaseUntil: (DateAndTime now + leaseDuration)
+		leaseUntil: (clock now + leaseDuration)
 		commitToken: UUID new asString
 		lastCommittedJournalPosition: (observed ifNil: [ 0 ] ifNotNil: [ observed lastCommittedJournalPosition ]).
 	result := store tryPromote: candidate to: newEpoch.
