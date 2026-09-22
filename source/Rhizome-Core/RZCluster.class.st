@@ -34,11 +34,6 @@ RZCluster >> buildHostsFromList: aCollection [
 ]
 
 { #category : 'as yet unclassified' }
-RZCluster >> defaultPlacementStrategy [
-	^ RZRendezvousHashingStrategy new 
-]
-
-{ #category : 'as yet unclassified' }
 RZCluster >> hostLeaseManager [
 	^ hostLeaseManager ifNil: [
 		hostLeaseManager := RZHostLeaseManager new

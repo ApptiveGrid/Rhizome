@@ -4,8 +4,8 @@ Class {
 	#instVars : [
 		'cluster'
 	],
-	#category : 'Rhizome-Core',
-	#package : 'Rhizome-Core'
+	#category : 'Rhizome-Placement',
+	#package : 'Rhizome-Placement'
 }
 
 { #category : 'accessing' }

@@ -25,19 +25,6 @@ RZReplicaSet >> cluster: aRZCluster [
 	cluster := aRZCluster
 ]
 
-{ #category : 'accessing' }
-RZReplicaSet >> endpointStatusAt: aReplica [ 
-	| response |
-	
-	response := cluster network newHttpClient
-		url: (ZnUrl new host: aReplica address; port: aReplica port) / #cluster / #databases / key;
-		get;
-		response.
-	^ response isSuccess 
-		ifTrue: [ STON fromString: response contents ]
-		ifFalse: [ nil ]
-]
-
 { #category : 'as yet unclassified' }
 RZReplicaSet >> handleRemoteAheadOf: remote status: status [
 	(self replicaState isPrimary: self cluster hostLeaseManager selfHost)

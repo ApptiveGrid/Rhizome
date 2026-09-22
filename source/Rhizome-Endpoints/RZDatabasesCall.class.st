@@ -1,8 +1,8 @@
 Class {
 	#name : 'RZDatabasesCall',
 	#superclass : 'RZRestCall',
-	#category : 'Rhizome-Core',
-	#package : 'Rhizome-Core'
+	#category : 'Rhizome-Endpoints',
+	#package : 'Rhizome-Endpoints'
 }
 
 { #category : 'accessing' }

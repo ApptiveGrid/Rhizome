@@ -17,17 +17,26 @@ BaselineOfRhizome >> baseline: spec [
 				murmur3: spec;
 				soil: spec;
 				zinc: spec.
+			"Rhizome-Core is the model and requires nothing. Everything that needs an
+			outside project sits beside it in a package of its own, so an image can
+			take the model - and discovery on top of it - without taking Soil, Zinc
+			or murmur3 along."
 			spec
-				package: 'Rhizome-Discovery' with: [ spec requires: #('Gossip') ];
+				package: 'Rhizome-Core';
+				package: 'Rhizome-Placement' with: [ spec requires: #('Rhizome-Core' 'NonCryptographicHashes') ];
+				package: 'Rhizome-Soil' with: [ spec requires: #('Rhizome-Core' 'Soil') ];
+				package: 'Rhizome-Endpoints' with: [ spec requires: #('Rhizome-Core' 'ZincHTTPComponents') ];
+				package: 'Rhizome-Discovery' with: [ spec requires: #('Rhizome-Core' 'Gossip') ];
 				package: 'Rhizome-Discovery-Tests' with: [ spec requires: #('Rhizome-Discovery') ];
-				package: 'Rhizome-Core' with: [ spec requires: #('NonCryptographicHashes' 'Gossip' 'Soil' 'ZincHTTPComponents') ];
-				package: 'Rhizome-Simulator' with: [ spec requires: #('Rhizome-Core' 'PharoDEVS') ];
-				package: 'Rhizome-Tests' with: [ spec requires: #('Rhizome-Core' 'Rhizome-Simulator') ].
+				package: 'Rhizome-Simulator' with: [ spec requires: #('Rhizome-Core' 'Rhizome-Endpoints' 'PharoDEVS') ];
+				package: 'Rhizome-Tests' with: [ spec requires: #('Rhizome-Core' 'Rhizome-Placement' 'Rhizome-Soil' 'Rhizome-Endpoints' 'Rhizome-Simulator') ].
 
 			spec
-				group: 'default' with: #('Core' 'Discovery');
-				group: 'Core' with: #('Rhizome-Core' 'Rhizome-Simulator' 'Rhizome-Tests');
-				group: 'Discovery' with: #('Rhizome-Discovery' 'Rhizome-Discovery-Tests') ]
+				group: 'default' with: #('All');
+				group: 'Model' with: #('Rhizome-Core');
+				group: 'Discovery' with: #('Rhizome-Core' 'Rhizome-Discovery' 'Rhizome-Discovery-Tests');
+				group: 'All' with: #('Rhizome-Core' 'Rhizome-Placement' 'Rhizome-Soil' 'Rhizome-Endpoints'
+					'Rhizome-Discovery' 'Rhizome-Discovery-Tests' 'Rhizome-Simulator' 'Rhizome-Tests') ]
 ]
 
 { #category : 'as yet unclassified' }

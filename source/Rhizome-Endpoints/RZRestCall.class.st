@@ -1,8 +1,8 @@
 Class {
 	#name : 'RZRestCall',
 	#superclass : 'ZnJSONRestCall',
-	#category : 'Rhizome-Core',
-	#package : 'Rhizome-Core'
+	#category : 'Rhizome-Endpoints',
+	#package : 'Rhizome-Endpoints'
 }
 
 { #category : 'accessing' }

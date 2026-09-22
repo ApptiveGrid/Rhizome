@@ -19,24 +19,7 @@ RZRemoteReplica class >> addressString: aString port: anInteger [
 		port: anInteger 
 ]
 
-{ #category : 'as yet unclassified' }
-RZRemoteReplica >> baseUrl [
-	^ ZnUrl new 
-		scheme: #http; 
-		host: self address; 
-		port: self port
-]
-
 { #category : 'printing' }
 RZRemoteReplica >> printOn: aStream [ 
 	aStream << 'remote: ' << self address printString << ':' << self port printString
-]
-
-{ #category : 'as yet unclassified' }
-RZRemoteReplica >> replicateTransactionJournal: aSoilTransactionJournal [ 
-	| response |
-	response := node cluster network newHttpClient
-		url: self baseUrl / #cluster / #databases / replicaSet key / #journals;
-		entity: (ZnByteArrayEntity bytes: aSoilTransactionJournal soilSerialize);
-		post 	
 ]

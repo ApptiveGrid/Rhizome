@@ -4,8 +4,8 @@ Class {
 	#instVars : [
 		'socket'
 	],
-	#category : 'Rhizome-Core',
-	#package : 'Rhizome-Core'
+	#category : 'Rhizome-Soil',
+	#package : 'Rhizome-Soil'
 }
 
 { #category : 'private - protocol' }

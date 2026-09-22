@@ -1,5 +1,5 @@
 "
-Covers what RZDiscovery answers about membership, and - in testDependsOnNothingFromTheRhizomeCore - guards the package cut itself.
+Covers what RZDiscovery answers about membership.
 "
 Class {
 	#name : 'RZDiscoveryTest',
@@ -28,31 +28,6 @@ RZDiscoveryTest >> setUp [
 ]
 
 { #category : 'tests' }
-RZDiscoveryTest >> testDependsOnNothingFromTheRhizomeCore [
-	"The cut this package exists for: it must be loadable into an Apptive image
-	with Gossip alone, without dragging Soil and murmur3 along through Rhizome-Core.
-	A reference to any other Rhizome package would do exactly that, so it fails here
-	rather than in someone else's build."
-	| offenders |
-	offenders := OrderedCollection new.
-	#('Rhizome-Discovery' 'Rhizome-Discovery-Tests') do: [ :packageName |
-		(self class environment at: #PackageOrganizer) default
-			packageNamed: packageName
-			ifAbsent: [ nil ].
-		((self class environment at: #PackageOrganizer) default packageNamed: packageName) definedClasses do: [ :each |
-			{ each . each class } do: [ :side |
-				side methodDict valuesDo: [ :method |
-					method literals do: [ :literal |
-						(literal isVariableBinding and: [ literal value isBehavior ]) ifTrue: [ | pkg |
-							pkg := [ literal value package name ] on: Error do: [ nil ].
-							(pkg notNil
-								and: [ (pkg beginsWith: 'Rhizome-')
-								and: [ (pkg beginsWith: 'Rhizome-Discovery') not ] ])
-								ifTrue: [ offenders add: side name , '>>' , method selector , ' -> ' , literal value name ] ] ] ] ] ] ].
-	self assert: offenders asArray equals: #()
-]
-
-{ #category : 'tests' }
 RZDiscoveryTest >> testKnowsItsOwnEndpointAsAMember [
 	self assert: (discovery includesMember: discovery localMember).
 	self assert: discovery size equals: 1
@@ -69,8 +44,6 @@ RZDiscoveryTest >> testLearnedEndpointBecomesAMember [
 ]
 
 { #category : 'tests' }
-RZDiscoveryTest >> testMembersAreGossipEndpointsAndNotClusterObjects [
-	"The second notion of membership is intentional - see RZDiscovery's class
-	comment. This pins it down so nobody quietly swaps in cluster objects."
+RZDiscoveryTest >> testMembersAreGossipEndpoints [
 	self assert: (discovery members allSatisfy: [ :each | each isKindOf: GossipEndpoint ])
 ]
