@@ -61,6 +61,21 @@ RhizomeTest >> testHandlesKeyDistinguishesImagesOnSameAndOtherHosts [
 	self deny: (otherHostImage handlesKey: 'db-1')
 ]
 
+{ #category : 'as yet unclassified' }
+RhizomeTest >> testLocalImageStartsAndStopsItsPeriodicWork [
+	"Builds the RZLocalImage directly: RZHost>>virtualNodeClass answers the
+	abstract RZImage for local and remote hosts alike, so addVirtualNodeWithPort:
+	would not give us a local one."
+	| image |
+	image := RZLocalImage port: 10000.
+	cluster localNode addVirtualNode: image.
+	self deny: image isRunning.
+	image start.
+	self assert: image isRunning.
+	image stop.
+	self deny: image isRunning
+]
+
 { #category : 'tests' }
 RhizomeTest >> testResolveReplicaSet [
 	| set |
