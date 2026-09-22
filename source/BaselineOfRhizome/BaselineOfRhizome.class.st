@@ -48,7 +48,7 @@ BaselineOfRhizome >> pharoDevs: spec [
 	spec
 		baseline: 'PharoDEVS' with: [ 
 			spec 
-				repository: 'github://ApptiveGrid/PharoDEVS:main/source' ]
+				repository: 'github://soil-fabric/PharoDEVS:main/source' ]
 ]
 
 { #category : 'accessing' }
