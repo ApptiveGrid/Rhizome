@@ -24,37 +24,10 @@ RZLocalHost >> cluster: aRZCluster [
 	cluster := aRZCluster 
 ]
 
-{ #category : 'as yet unclassified' }
-RZLocalHost >> createDatabaseWithId: aString [ 
-	| path |
-	path := self databaseLocator pathForId: aString.
-	path exists ifTrue: [ Error signal: 'database already exists' ].
-	^ (Soil path: path)
-		initializeFilesystem;
-		yourself
-]
-
 { #category : 'accessing' }
 RZLocalHost >> databaseLocator [
 	^ databaseLocator ifNil: [ 
 		databaseLocator := self defaultDatabaseLocator ]
-]
-
-{ #category : 'accessing' }
-RZLocalHost >> databaseWithId: aString [ 
-	| path |
-	path := self databaseLocator pathForId: aString.
-	path exists ifFalse: [ Error signal: 'database not found at ', path printString ].
-	^ Soil path: path
-]
-
-{ #category : 'accessing' }
-RZLocalHost >> databaseWithId: aString ifAbsent: aBlock [ 
-	| path |
-	path := self databaseLocator pathForId: aString.
-	^ path exists 
-		ifTrue: [ Soil path: path ]
-		ifFalse: aBlock 
 ]
 
 { #category : 'as yet unclassified' }

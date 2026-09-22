@@ -1,7 +1,7 @@
 "
 What this image knows about the other images: their gossip endpoints, and nothing more.
 
-It carries its own notion of membership, over Gossip's endpoints, instead of reaching into RZCluster. That is deliberate and it has a price: there are two notions of membership in this repository for the time being - RZCluster holds RZHosts built from a static list, this holds GossipEndpoints learned from the network. They have to be brought together when the cluster itself moves onto discovery. Until then, do not make one refer to the other; the whole point of this package is that it can be loaded into an Apptive image without dragging Soil and murmur3 along.
+It sits on top of Rhizome-Core, the model, and adds the one outside dependency it needs: Gossip. That is the whole point of the package cut - an Apptive image can take the model and discovery without taking Soil, Zinc or murmur3 along, because those live in packages of their own.
 
 It makes no statement about liveness. A member appearing here means it has been heard from, not that it is up - deciding ""gone"" stays with the lease manager until a failure detector of its own exists.
 "
@@ -44,8 +44,7 @@ RZDiscovery >> localMember [
 
 { #category : 'accessing' }
 RZDiscovery >> members [
-	"Every endpoint this image has heard of, its own included. These are
-	GossipEndpoints, not cluster objects - see the class comment on why."
+	"Every endpoint this image has heard of, its own included."
 	^ gossiper endpoints keys
 ]
 
