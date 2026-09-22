@@ -60,7 +60,7 @@ BaselineOfRhizome >> pharoDevs: spec [
 	spec
 		baseline: 'PharoDEVS' with: [ 
 			spec 
-				repository: 'github://soil-fabric/PharoDEVS:feature/acting-in-simulated-time/source' ]
+				repository: 'github://soil-fabric/PharoDEVS:main/source' ]
 ]
 
 { #category : 'accessing' }
