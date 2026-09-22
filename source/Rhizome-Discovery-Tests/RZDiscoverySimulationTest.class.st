@@ -1,0 +1,175 @@
+"
+Discovery with the messages actually flying: several nodes in one simulated network, each with a gossiper of its own, and the question whether every node ends up knowing what kind of node every other one is.
+
+Every image in this simulation is three objects: a DEVSNetworkHost standing for the machine, an RZLocalHost with its RZLocalNode standing for the Rhizome side, and a DevsGossiper speaking for it. The DEVS network addresses its hosts by name, and DevsGossiper hands it the gossip port as that name - so inside the simulation a node is addressed by its gossip port, while the address it publishes to the others stays a real one.
+
+The rounds happen one after another in simulated time, because each server has a heartbeat that gossips. That is what makes the difference: everything stirred up before a run happens at time zero, in lock step, and then no round can pass on what an earlier one learned - which is exactly how gossip reaches a node it cannot talk to directly.
+
+Nothing is started here and no socket is opened; time passes only because the solver runs.
+"
+Class {
+	#name : 'RZDiscoverySimulationTest',
+	#superclass : 'TestCase',
+	#instVars : [
+		'network',
+		'router',
+		'nodes'
+	],
+	#category : 'Rhizome-Discovery-Tests',
+	#package : 'Rhizome-Discovery-Tests'
+}
+
+{ #category : 'running' }
+RZDiscoverySimulationTest >> addNodeNamed: aSymbol port: anInteger gossipPort: gossipPort type: aType every: aPeriod [
+	"Put one more image into the simulation: a DEVSNetworkHost standing for the
+	machine, an RZLocalHost with its RZLocalNode standing for the Rhizome side, and
+	a DevsGossiper speaking for it, gossiping every aPeriod ticks of its own accord.
+	The two ports are two different things and deliberately not the same number:
+	anInteger is the port the node serves requests on, gossipPort the one the
+	gossiper speaks on. The three periods differ so the rounds interleave instead
+	of marching in step."
+	| server host node gossiper |
+	server := DEVSPluggableServer new
+		name: (aSymbol , 'Server') asSymbol;
+		port: 1;
+		yourself.
+	network addHost: (DEVSNetworkHost new
+		name: aSymbol;
+		address: gossipPort printString;
+		addServer: server;
+		yourself).
+	host := RZLocalHost name: aSymbol address: '127.0.0.1'.
+	node := RZLocalNode port: anInteger.
+	host addNode: node.
+	node type: aType.
+	gossiper := DevsGossiper new
+		port: gossipPort;
+		devsServer: server;
+		yourself.
+	node gossiper: gossiper.
+	"A node says what it is as it comes up; a gossiper knows nobody, not even
+	itself, until it first touches its own state, and announcing does that."
+	node announceType.
+	server onIncomingDo: [ :message :srv |
+		gossiper
+			received: message payload
+			from: (GossipEndpoint address: #[127 0 0 1] port: message sourceAddress asInteger).
+		nil ].
+	server every: aPeriod do: [ :srv | gossiper gossip ].
+	nodes at: aSymbol put: node.
+	^ node
+]
+
+{ #category : 'running' }
+RZDiscoverySimulationTest >> at: aTime do: aBlock [
+	"Have something happen once, while the run is going. A trigger repeats, so the
+	block guards itself."
+	| done |
+	done := false.
+	network addComponent: (DEVSPluggableTrigger new
+		name: ('once' , aTime printString) asSymbol;
+		period: aTime;
+		onTickDo: [ :time | done ifFalse: [ done := true. aBlock value ] ];
+		yourself)
+]
+
+{ #category : 'accessing' }
+RZDiscoverySimulationTest >> node: aSymbol [
+	^ nodes at: aSymbol
+]
+
+{ #category : 'accessing' }
+RZDiscoverySimulationTest >> router [
+	^ router
+]
+
+{ #category : 'running' }
+RZDiscoverySimulationTest >> runSimulationFor: ticks [
+	| simulation |
+	simulation := DEVSSimulation new.
+	simulation model: network.
+	simulation coordinator: DEVSRootSolver new.
+	simulation runTo: ticks
+]
+
+{ #category : 'running' }
+RZDiscoverySimulationTest >> seedEveryNodeWithEveryOther [
+	"The same one line for every node, as a deployment would hand it over: gossip
+	leaves itself out when it picks whom to talk to."
+	nodes valuesDo: [ :each |
+		each seedsFromConfiguration: '127.0.0.1:9001, 127.0.0.1:9002, 127.0.0.1:9003' ]
+]
+
+{ #category : 'running' }
+RZDiscoverySimulationTest >> setUp [
+	super setUp.
+	network := DEVSNetwork new name: #net; yourself.
+	"The router goes in before the hosts: addHost: couples every host to whatever
+	router is in place at that moment."
+	router := network router: DEVSFaultInjectingNetworkRouter new.
+	nodes := Dictionary new.
+	self addNodeNamed: #node1 port: 4851 gossipPort: 9001 type: #base every: 20.
+	self addNodeNamed: #node2 port: 4852 gossipPort: 9002 type: #account every: 25.
+	self addNodeNamed: #node3 port: 4853 gossipPort: 9003 type: #metabase every: 30.
+	self seedEveryNodeWithEveryOther
+]
+
+{ #category : 'tests' }
+RZDiscoverySimulationTest >> testANodeIsReachedThroughAThirdOne [
+	"Two nodes that cannot exchange a single message still learn what the other is,
+	because the third one passes on what it knows. This is the property that makes
+	the difference between gossip and everyone asking everyone - and it only shows
+	when the rounds happen one after another in simulated time: a node can only
+	pass on what it has already learned."
+	router simulateNetworkPartition: '9001' and: '9002'.
+	self runSimulationFor: 400.
+	self
+		assert: ((self node: #node1) typeOfMember: (self node: #node2) gossipEndpoint)
+		equals: #account.
+	self
+		assert: ((self node: #node2) typeOfMember: (self node: #node1) gossipEndpoint)
+		equals: #base
+]
+
+{ #category : 'tests' }
+RZDiscoverySimulationTest >> testEveryNodeLearnsTheTypeOfEveryOther [
+	"The point of stage one, now with the messages actually travelling: what a
+	node says about itself arrives at the others unchanged."
+	self runSimulationFor: 200.
+	nodes valuesDo: [ :each |
+		nodes valuesDo: [ :other |
+			self
+				assert: (each typeOfMember: other gossipEndpoint)
+				equals: other type ] ]
+]
+
+{ #category : 'tests' }
+RZDiscoverySimulationTest >> testEveryNodeSeesEveryMember [
+	"Membership first, before anything is said about the members."
+	self runSimulationFor: 200.
+	nodes valuesDo: [ :each |
+		self assert: each discovery size equals: 3 ]
+]
+
+{ #category : 'tests' }
+RZDiscoverySimulationTest >> testTypesConvergeAfterAPartitionHeals [
+	"One node cut off from both others, and the partition taken back while the run
+	is still going: nobody restarts anything, and the cluster closes over it again.
+	The check at t=150 is there so the test says both halves - cut off while the
+	partition lasts, converged once it is over - rather than only the happy end."
+	| duringThePartition |
+	router simulateNetworkPartition: '9002' and: '9001'.
+	router simulateNetworkPartition: '9002' and: '9003'.
+	self at: 150 do: [
+		duringThePartition := (self node: #node1) typeOfMember: (self node: #node2) gossipEndpoint ].
+	self at: 200 do: [
+		router healPartition: '9002' and: '9001'.
+		router healPartition: '9002' and: '9003' ].
+	self runSimulationFor: 400.
+	self assert: duringThePartition isNil.
+	nodes valuesDo: [ :each |
+		nodes valuesDo: [ :other |
+			self
+				assert: (each typeOfMember: other gossipEndpoint)
+				equals: other type ] ]
+]
