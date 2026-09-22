@@ -14,9 +14,9 @@ RZRendezvousHashingStrategy >> cluster: aRZCluster [
 ]
 
 { #category : 'as yet unclassified' }
-RZRendezvousHashingStrategy >> nodeNameForKey: aString [ 
+RZRendezvousHashingStrategy >> hostNameForKey: aString [ 
 	| names hashes |
-	names := cluster nodeNames.
+	names := cluster hostNames.
 	hashes := names collect: [ :name | 
 		(NCHMurmur3 withSeed: 0) 
 			hash: (name,aString) asByteArray ].
@@ -24,9 +24,9 @@ RZRendezvousHashingStrategy >> nodeNameForKey: aString [
 ]
 
 { #category : 'as yet unclassified' }
-RZRendezvousHashingStrategy >> nodeNamesForKey: aString [ 
+RZRendezvousHashingStrategy >> hostNamesForKey: aString [ 
 	| names hashes |
-	names := cluster nodeNames.
+	names := cluster hostNames.
 	hashes := names collect: [ :name | 
 		(NCHMurmur3 withSeed: 0) 
 			hash: (name,aString) asByteArray ].

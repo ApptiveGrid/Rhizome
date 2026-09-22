@@ -14,10 +14,10 @@ RZSimulatedNetwork >> addressAt: aString [
 ]
 
 { #category : 'as yet unclassified' }
-RZSimulatedNetwork >> announce: aRZLocalVirtualNode to: aString [ 
+RZSimulatedNetwork >> announce: aRZLocalNode to: aString [ 
 	(addresses at: aString) values do: [ :each | 
-		(each cluster nodeWithAddress: aRZLocalVirtualNode node address)
-				addVirtualNodeWithPort: aRZLocalVirtualNode port ]
+		(each cluster hostWithAddress: aRZLocalNode host address)
+				addNodeWithPort: aRZLocalNode port ]
 ]
 
 { #category : 'as yet unclassified' }
@@ -46,26 +46,26 @@ RZSimulatedNetwork >> newRestServer [
 { #category : 'as yet unclassified' }
 RZSimulatedNetwork >> newWebSocketTo: aHost port: aPort [
 	| targetServer handler |
-	targetServer := self virtualNodeWithAddress: aHost port: aPort.
-	handler := RZWebsocketHandler new endpoint: targetServer virtualNode node.
+	targetServer := self nodeWithAddress: aHost port: aPort.
+	handler := RZWebsocketHandler new endpoint: targetServer node host.
 	^ RZSimulatedWebSocket new handler: handler; yourself
 ]
 
 { #category : 'as yet unclassified' }
-RZSimulatedNetwork >> registerCluster: cluster [ 
-	cluster nodes do: [ :node |
-		node isLocalNode ifTrue: [  
-			self registerNode: node ] ].
-]
-
-{ #category : 'as yet unclassified' }
-RZSimulatedNetwork >> registerNode: aRZNode [ 
-	| host |
-	host := addresses at: aRZNode address ifAbsentPut: [ Dictionary new ].
-	"host at: aRZNode server port put: aRZNode server"
-]
-
-{ #category : 'as yet unclassified' }
-RZSimulatedNetwork >> virtualNodeWithAddress: aString port: aNumber [ 
+RZSimulatedNetwork >> nodeWithAddress: aString port: aNumber [ 
 	^ (addresses at: aString) at: aNumber  
+]
+
+{ #category : 'as yet unclassified' }
+RZSimulatedNetwork >> registerCluster: cluster [ 
+	cluster hosts do: [ :host |
+		host isLocalHost ifTrue: [  
+			self registerHost: host ] ].
+]
+
+{ #category : 'as yet unclassified' }
+RZSimulatedNetwork >> registerHost: aRZHost [ 
+	| host |
+	host := addresses at: aRZHost address ifAbsentPut: [ Dictionary new ].
+	"host at: aRZHost server port put: aRZHost server"
 ]

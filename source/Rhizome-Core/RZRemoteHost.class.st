@@ -6,6 +6,6 @@ Class {
 }
 
 { #category : 'testing' }
-RZRemoteHost >> isLocalNode [
+RZRemoteHost >> isLocalHost [
 	^ false
 ]

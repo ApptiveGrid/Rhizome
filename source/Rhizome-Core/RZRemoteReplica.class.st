@@ -35,7 +35,7 @@ RZRemoteReplica >> printOn: aStream [
 { #category : 'as yet unclassified' }
 RZRemoteReplica >> replicateTransactionJournal: aSoilTransactionJournal [ 
 	| response |
-	response := virtualNode cluster network newHttpClient
+	response := node cluster network newHttpClient
 		url: self baseUrl / #cluster / #databases / replicaSet key / #journals;
 		entity: (ZnByteArrayEntity bytes: aSoilTransactionJournal soilSerialize);
 		post 	

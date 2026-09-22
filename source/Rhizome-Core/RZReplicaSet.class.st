@@ -74,12 +74,12 @@ RZReplicaSet >> key: anObject [
 
 { #category : 'as yet unclassified' }
 RZReplicaSet >> localReplica [
-	^ replicas detect: [ :replica | replica node = cluster localNode ]
+	^ replicas detect: [ :replica | replica host = cluster localHost ]
 ]
 
 { #category : 'as yet unclassified' }
 RZReplicaSet >> remoteReplicas [
-	^ replicas reject: [ :each | each node = cluster localNode ]
+	^ replicas reject: [ :each | each host = cluster localHost ]
 ]
 
 { #category : 'as yet unclassified' }

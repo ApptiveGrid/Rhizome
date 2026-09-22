@@ -13,11 +13,11 @@ Class {
 
 { #category : 'as yet unclassified' }
 RZDevsClusterFaultInjectionTest >> clusterAt: anAddress [
-	^ clusters detect: [ :each | each localNode address = anAddress ]
+	^ clusters detect: [ :each | each localHost address = anAddress ]
 ]
 
 { #category : 'as yet unclassified' }
-RZDevsClusterFaultInjectionTest >> nodeList [
+RZDevsClusterFaultInjectionTest >> hostList [
 	^ {
 		#node1 -> '127.0.0.1'.
 		#node2 -> '127.0.0.2'.
@@ -30,9 +30,9 @@ RZDevsClusterFaultInjectionTest >> nodeList [
 { #category : 'as yet unclassified' }
 RZDevsClusterFaultInjectionTest >> primaryClusterForKey: aKey [
 	| winningNames winningName winningAddress |
-	winningNames := clusters first placementStrategy nodeNamesForKey: aKey.
+	winningNames := clusters first placementStrategy hostNamesForKey: aKey.
 	winningName := winningNames first.
-	winningAddress := (self nodeList detect: [ :assoc | assoc key = winningName ]) value.
+	winningAddress := (self hostList detect: [ :assoc | assoc key = winningName ]) value.
 	^ self clusterAt: winningAddress
 ]
 
@@ -41,18 +41,18 @@ RZDevsClusterFaultInjectionTest >> setUp [
 	super setUp.
 	router := RZDevsNetworkRouter new.
 	sharedAddresses := Dictionary new.
-	clusters := self nodeList collect: [ :assoc | | cluster network |
+	clusters := self hostList collect: [ :assoc | | cluster network |
 		network := RZDevsSimulatedNetwork
 			forAddress: assoc value
 			addresses: sharedAddresses
 			router: router.
 		cluster := RZCluster new
 			localAddress: assoc value;
-			buildNodesFromList: self nodeList.
+			buildHostsFromList: self hostList.
 		cluster network: network.
-		cluster localNode
+		cluster localHost
 			basePath: ('rhizome-devs/', assoc value asString);
-			registerNode;
+			registerHost;
 			registerOnPort: 5555.
 		cluster ].
 	clusters do: [ :cluster | cluster announceAll ]
@@ -105,9 +105,9 @@ RZDevsClusterFaultInjectionTest >> testInitialSyncSkipsUnreachableReplicaWithout
 	set := primary replicaSetForKey: 'db-4'.
 	self writeInitialCommitFor: set.
 	remote := set remoteReplicas first.
-	router simulateNetworkPartition: primary localNode address and: remote address.
+	router simulateNetworkPartition: primary localHost address and: remote address.
 	set start.
-	router healPartition: primary localNode address and: remote address.
+	router healPartition: primary localHost address and: remote address.
 	self assert: (set endpointStatusAt: remote) isNil
 ]
 
@@ -118,8 +118,8 @@ RZDevsClusterFaultInjectionTest >> testInitialSyncSucceedsAfterHealingPartition 
 	set := primary replicaSetForKey: 'db-3'.
 	self writeInitialCommitFor: set.
 	remote := set remoteReplicas first.
-	router simulateNetworkPartition: primary localNode address and: remote address.
-	router healPartition: primary localNode address and: remote address.
+	router simulateNetworkPartition: primary localHost address and: remote address.
+	router healPartition: primary localHost address and: remote address.
 	set start.
 	set remoteReplicas do: [ :r |
 		self assert: (set endpointStatusAt: r) databaseVersion equals: set localReplica databaseVersion ]
@@ -151,7 +151,7 @@ RZDevsClusterFaultInjectionTest >> testPartitionDoesNotAffectLeaseRenewal [
 	hostA := clusters first.
 	hostB := clusters second.
 	hostA hostLeaseManager tryPromoteFor: #lease2.
-	router simulateNetworkPartition: hostA localNode address and: hostB localNode address.
+	router simulateNetworkPartition: hostA localHost address and: hostB localHost address.
 	self assert: (hostA hostLeaseManager renewFor: #lease2) notNil.
 	self assert: (hostA hostLeaseManager isWritableFor: #lease2)
 ]
@@ -168,7 +168,7 @@ RZDevsClusterFaultInjectionTest >> testRequestRouterForwardsToNewPrimaryAfterPro
 	requestRouter := RZRequestRouter new cluster: hostA.
 	decision := requestRouter resolveFor: #lease3.
 	self assert: decision isForward.
-	self assert: decision targetImage node address equals: hostB localNode address
+	self assert: decision targetNode host address equals: hostB localHost address
 ]
 
 { #category : 'as yet unclassified' }
@@ -185,17 +185,17 @@ RZDevsClusterFaultInjectionTest >> testUnreachableReplicaDoesNotBlockOtherReplic
 	self writeInitialCommitFor: set.
 	unreachable := set remoteReplicas first.
 	reachable := set remoteReplicas second.
-	router simulateNetworkPartition: primary localNode address and: unreachable address.
+	router simulateNetworkPartition: primary localHost address and: unreachable address.
 	set start.
 	self assert: (set endpointStatusAt: reachable) databaseVersion equals: set localReplica databaseVersion.
-	router healPartition: primary localNode address and: unreachable address.
+	router healPartition: primary localHost address and: unreachable address.
 	self assert: (set endpointStatusAt: unreachable) isNil
 ]
 
 { #category : 'as yet unclassified' }
 RZDevsClusterFaultInjectionTest >> writeInitialCommitFor: replicaSet [
 	| db txn |
-	replicaSet cluster localNode createDatabaseWithId: replicaSet key.
+	replicaSet cluster localHost createDatabaseWithId: replicaSet key.
 	db := replicaSet localReplica soil.
 	txn := db newTransaction.
 	txn root: Dictionary new.
@@ -203,10 +203,10 @@ RZDevsClusterFaultInjectionTest >> writeInitialCommitFor: replicaSet [
 ]
 
 { #category : 'as yet unclassified' }
-RZDevsClusterFaultInjectionTest >> writeInitialCommitFor: virtualNode key: dbId [
+RZDevsClusterFaultInjectionTest >> writeInitialCommitFor: node key: dbId [
 	| db txn |
-	virtualNode node createDatabaseWithId: dbId.
-	db := (virtualNode cluster replicaSetForKey: dbId) replicas first soil.
+	node host createDatabaseWithId: dbId.
+	db := (node cluster replicaSetForKey: dbId) replicas first soil.
 	txn := db newTransaction.
 	txn root: Dictionary new.
 	txn commit

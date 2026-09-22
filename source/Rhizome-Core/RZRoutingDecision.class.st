@@ -3,7 +3,7 @@ Class {
 	#superclass : 'Object',
 	#instVars : [
 		'kind',
-		'targetImage'
+		'targetNode'
 	],
 	#category : 'Rhizome-Core',
 	#package : 'Rhizome-Core'
@@ -11,7 +11,7 @@ Class {
 
 { #category : 'as yet unclassified' }
 RZRoutingDecision class >> forward: anImage [
-	^ self new kind: #forward; targetImage: anImage; yourself
+	^ self new kind: #forward; targetNode: anImage; yourself
 ]
 
 { #category : 'as yet unclassified' }
@@ -47,16 +47,16 @@ RZRoutingDecision >> kind: aSymbol [
 { #category : 'as yet unclassified' }
 RZRoutingDecision >> printOn: aStream [
 	aStream << 'RZRoutingDecision(' << kind printString.
-	targetImage ifNotNil: [ aStream << ' -> ' << targetImage printString ].
+	targetNode ifNotNil: [ aStream << ' -> ' << targetNode printString ].
 	aStream << ')'
 ]
 
 { #category : 'as yet unclassified' }
-RZRoutingDecision >> targetImage [
-	^ targetImage
+RZRoutingDecision >> targetNode [
+	^ targetNode
 ]
 
 { #category : 'as yet unclassified' }
-RZRoutingDecision >> targetImage: anImage [
-	targetImage := anImage
+RZRoutingDecision >> targetNode: anImage [
+	targetNode := anImage
 ]

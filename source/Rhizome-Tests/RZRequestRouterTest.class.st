@@ -15,10 +15,10 @@ RZRequestRouterTest >> setUp [
 	super setUp.
 	cluster := RZCluster new.
 	cluster localAddress: '10.0.0.1'.
-	cluster buildNodesFromList: { #hostA -> '10.0.0.1'. #hostB -> '10.0.0.2'. #hostC -> '10.0.0.3'. #hostD -> '10.0.0.4' }.
+	cluster buildHostsFromList: { #hostA -> '10.0.0.1'. #hostB -> '10.0.0.2'. #hostC -> '10.0.0.3'. #hostD -> '10.0.0.4' }.
 	cluster ownershipStore: RZInMemoryOwnershipStore new.
-	hosts := cluster nodes.
-	hosts do: [ :host | host addVirtualNode: (RZLocalImage port: 9001) ].
+	hosts := cluster hosts.
+	hosts do: [ :host | host addNode: (RZLocalNode port: 9001) ].
 	router := RZRequestRouter new cluster: cluster; yourself
 ]
 
@@ -40,7 +40,7 @@ RZRequestRouterTest >> testForwardsToKnownValidPrimary [
 		lastCommittedJournalPosition: 0) to: 1.
 	decision := router resolveFor: #keyB.
 	self assert: decision isForward.
-	self assert: decision targetImage notNil
+	self assert: decision targetNode notNil
 ]
 
 { #category : 'as yet unclassified' }

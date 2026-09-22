@@ -35,10 +35,10 @@ RZDevsSimulatedNetwork >> addresses: aDictionary [
 ]
 
 { #category : 'as yet unclassified' }
-RZDevsSimulatedNetwork >> announce: aRZLocalVirtualNode to: aString [
+RZDevsSimulatedNetwork >> announce: aRZLocalNode to: aString [
 	(addresses at: aString) values do: [ :each |
-		(each cluster nodeWithAddress: aRZLocalVirtualNode node address)
-			addVirtualNodeWithPort: aRZLocalVirtualNode port ]
+		(each cluster hostWithAddress: aRZLocalNode host address)
+			addNodeWithPort: aRZLocalNode port ]
 ]
 
 { #category : 'as yet unclassified' }
@@ -100,8 +100,8 @@ RZDevsSimulatedNetwork >> newRestServer [
 RZDevsSimulatedNetwork >> newWebSocketTo: aHost port: aPort [
 	| targetServer handler |
 	self checkDeliverableTo: aHost.
-	targetServer := self virtualNodeWithAddress: aHost port: aPort.
-	handler := RZWebsocketHandler new endpoint: targetServer virtualNode node.
+	targetServer := self nodeWithAddress: aHost port: aPort.
+	handler := RZWebsocketHandler new endpoint: targetServer node host.
 	^ RZDevsWebSocket new
 		handler: handler;
 		network: self;
@@ -110,14 +110,19 @@ RZDevsSimulatedNetwork >> newWebSocketTo: aHost port: aPort [
 ]
 
 { #category : 'as yet unclassified' }
-RZDevsSimulatedNetwork >> registerCluster: cluster [
-	cluster nodes do: [ :node |
-		node isLocalNode ifTrue: [
-			self registerNode: node ] ]
+RZDevsSimulatedNetwork >> nodeWithAddress: aString port: aNumber [
+	^ (addresses at: aString) at: aNumber
 ]
 
 { #category : 'as yet unclassified' }
-RZDevsSimulatedNetwork >> registerNode: aRZHost [
+RZDevsSimulatedNetwork >> registerCluster: cluster [
+	cluster hosts do: [ :host |
+		host isLocalHost ifTrue: [
+			self registerHost: host ] ]
+]
+
+{ #category : 'as yet unclassified' }
+RZDevsSimulatedNetwork >> registerHost: aRZHost [
 	addresses at: aRZHost address ifAbsentPut: [ Dictionary new ]
 ]
 
@@ -134,9 +139,4 @@ RZDevsSimulatedNetwork >> router: aRZDevsNetworkRouter [
 { #category : 'as yet unclassified' }
 RZDevsSimulatedNetwork >> simulateNetworkPartition: addr1 and: addr2 [
 	router simulateNetworkPartition: addr1 and: addr2
-]
-
-{ #category : 'as yet unclassified' }
-RZDevsSimulatedNetwork >> virtualNodeWithAddress: aString port: aNumber [
-	^ (addresses at: aString) at: aNumber
 ]

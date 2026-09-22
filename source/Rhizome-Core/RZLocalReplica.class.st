@@ -57,7 +57,7 @@ RZLocalReplica >> notificationHandler [
 
 { #category : 'as yet unclassified' }
 RZLocalReplica >> openSoil [
-	^ (virtualNode node databaseWithId: replicaSet key) open  
+	^ (node host databaseWithId: replicaSet key) open  
 ]
 
 { #category : 'accessing' }

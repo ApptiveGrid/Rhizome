@@ -60,18 +60,18 @@ RZLocalHost >> databaseWithId: aString ifAbsent: aBlock [
 { #category : 'as yet unclassified' }
 RZLocalHost >> defaultDatabaseLocator [
 	^ RZSimpleDatabaseLocator new
-		node: self;
+		host: self;
 		yourself 
 ]
 
 { #category : 'testing' }
-RZLocalHost >> isLocalNode [
+RZLocalHost >> isLocalHost [
 	^ true
 ]
 
 { #category : 'as yet unclassified' }
-RZLocalHost >> localVirtualNode [
-	^ virtualNodes detect: [ :each | each isKindOf: RZLocalImage ]
+RZLocalHost >> localNode [
+	^ nodes detect: [ :each | each isKindOf: RZLocalNode ]
 ]
 
 { #category : 'accessing' }
@@ -80,18 +80,18 @@ RZLocalHost >> network [
 ]
 
 { #category : 'as yet unclassified' }
-RZLocalHost >> registerNode [
-	self network registerNode: self
+RZLocalHost >> registerHost [
+	self network registerHost: self
 ]
 
 { #category : 'as yet unclassified' }
 RZLocalHost >> registerOnPort: anInteger [ 
-	"create a REST server with the port and add a virtual node
-	with the same setting so we can know which virtual node we are"
-	| virtualNode |
-	virtualNode := RZLocalImage port: anInteger.
-	self addVirtualNode: virtualNode.
-	(self network addressAt: address) at: anInteger put: virtualNode server 
+	"create a REST server with the port and add a node
+	with the same setting so we can know which node we are"
+	| node |
+	node := RZLocalNode port: anInteger.
+	self addNode: node.
+	(self network addressAt: address) at: anInteger put: node server 
 ]
 
 { #category : 'accessing' }
