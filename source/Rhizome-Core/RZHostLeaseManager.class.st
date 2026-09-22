@@ -9,8 +9,6 @@ Class {
 		'leaseDuration',
 		'renewInterval',
 		'safetyMargin',
-		'process',
-		'running',
 		'clock'
 	],
 	#category : 'Rhizome-Core',
@@ -55,8 +53,7 @@ RZHostLeaseManager >> initialize [
 	leaseDuration := 15 seconds.
 	renewInterval := 5 seconds.
 	safetyMargin := 2 seconds.
-	clock := DateAndTime.
-	running := false
+	clock := DateAndTime
 ]
 
 { #category : 'as yet unclassified' }
@@ -90,6 +87,10 @@ RZHostLeaseManager >> localEpochFor: dbId [
 
 { #category : 'as yet unclassified' }
 RZHostLeaseManager >> renewAll [
+	"Renew every lease this host currently holds, once. Nothing inside this
+	class calls it on a timer: the manager owns no process. Whoever drives the
+	host decides when a renewal round happens - the RZNode in production, the
+	model in a simulation - and reads #renewInterval for how often."
 	| dbIds |
 	dbIds := semaphore critical: [ records keys asArray ].
 	dbIds do: [ :dbId | self renewFor: dbId ]
@@ -113,6 +114,13 @@ RZHostLeaseManager >> renewFor: dbId [
 ]
 
 { #category : 'as yet unclassified' }
+RZHostLeaseManager >> renewInterval [
+	"How often a renewal round should happen. The manager does not act on this
+	itself; it is the cadence it asks its driver for."
+	^ renewInterval
+]
+
+{ #category : 'as yet unclassified' }
 RZHostLeaseManager >> renewInterval: aDuration [
 	renewInterval := aDuration
 ]
@@ -130,25 +138,6 @@ RZHostLeaseManager >> selfHost [
 { #category : 'as yet unclassified' }
 RZHostLeaseManager >> selfHost: aHostIdentifier [
 	selfHost := aHostIdentifier
-]
-
-{ #category : 'as yet unclassified' }
-RZHostLeaseManager >> start [
-	running ifTrue: [ ^ self ].
-	running := true.
-	process := [
-		[ running ] whileTrue: [
-			self renewAll.
-			renewInterval wait ] ]
-		forkNamed: 'RZHostLeaseManager renewal loop for ', selfHost printString
-]
-
-{ #category : 'as yet unclassified' }
-RZHostLeaseManager >> stop [
-	running := false.
-	process ifNotNil: [
-		process terminate.
-		process := nil ]
 ]
 
 { #category : 'as yet unclassified' }

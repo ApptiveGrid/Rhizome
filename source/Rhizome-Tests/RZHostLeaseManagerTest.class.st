@@ -18,12 +18,6 @@ RZHostLeaseManagerTest >> setUp [
 ]
 
 { #category : 'as yet unclassified' }
-RZHostLeaseManagerTest >> tearDown [
-	manager stop.
-	super tearDown
-]
-
-{ #category : 'as yet unclassified' }
 RZHostLeaseManagerTest >> testFreshPromoteMakesWritable [
 	| result |
 	result := manager tryPromoteFor: #db1.
@@ -55,6 +49,22 @@ RZHostLeaseManagerTest >> testLosingOwnershipDemotesImmediately [
 ]
 
 { #category : 'as yet unclassified' }
+RZHostLeaseManagerTest >> testRenewAllExtendsEveryHeldLease [
+	| manualClock beforeOne beforeTwo |
+	manualClock := RZManualClock new.
+	manager clock: manualClock.
+	store clock: manualClock.
+	manager tryPromoteFor: #db1.
+	manager tryPromoteFor: #db2.
+	beforeOne := manager writeAllowedUntilFor: #db1.
+	beforeTwo := manager writeAllowedUntilFor: #db2.
+	manualClock advanceBy: 1 second.
+	manager renewAll.
+	self assert: (manager writeAllowedUntilFor: #db1) > beforeOne.
+	self assert: (manager writeAllowedUntilFor: #db2) > beforeTwo
+]
+
+{ #category : 'as yet unclassified' }
 RZHostLeaseManagerTest >> testRenewExtendsWriteWindow [
 	| manualClock before after |
 	manualClock := RZManualClock new.
@@ -64,19 +74,6 @@ RZHostLeaseManagerTest >> testRenewExtendsWriteWindow [
 	before := manager writeAllowedUntilFor: #db1.
 	manualClock advanceBy: 1 second.
 	manager renewFor: #db1.
-	after := manager writeAllowedUntilFor: #db1.
-	self assert: after > before
-]
-
-{ #category : 'as yet unclassified' }
-RZHostLeaseManagerTest >> testStartRunsBackgroundRenewalLoop [
-	| before after |
-	manager renewInterval: 20 milliSeconds.
-	manager tryPromoteFor: #db1.
-	before := manager writeAllowedUntilFor: #db1.
-	manager start.
-	(Delay forMilliseconds: 80) wait.
-	manager stop.
 	after := manager writeAllowedUntilFor: #db1.
 	self assert: after > before
 ]
