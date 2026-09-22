@@ -44,7 +44,7 @@ BaselineOfRhizome >> gossip: spec [
 
 	spec baseline: 'Gossip' with: [ 
 		spec 
-			repository: 'github://ApptiveGrid/Gossip:feature/last-seen-per-endpoint/source' ]
+			repository: 'github://ApptiveGrid/Gossip:main/source' ]
 ]
 
 { #category : 'as yet unclassified' }
