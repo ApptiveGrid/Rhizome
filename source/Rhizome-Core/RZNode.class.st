@@ -3,7 +3,9 @@ Class {
 	#superclass : 'Object',
 	#instVars : [
 		'port',
-		'host'
+		'host',
+		'type',
+		'gossiper'
 	],
 	#category : 'Rhizome-Core-Objects',
 	#package : 'Rhizome-Core',
@@ -74,4 +76,16 @@ RZNode >> targetNodeFor: aString [
 	^ (self handlesKey: aString)
 		ifTrue: [ self ]
 		ifFalse: [ (host resolveHostForKey: aString) resolveNodeForKey: aString  ] 
+]
+
+{ #category : 'accessing' }
+RZNode >> type [
+	"What kind of node this is: #base, #account, #metabase or #lurker.
+	Discovery publishes it; see RZNode class>>knownTypes."
+	^ type
+]
+
+{ #category : 'accessing' }
+RZNode >> type: aSymbol [
+	type := aSymbol
 ]
