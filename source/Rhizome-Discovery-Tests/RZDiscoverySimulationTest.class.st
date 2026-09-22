@@ -13,7 +13,8 @@ Class {
 	#instVars : [
 		'network',
 		'router',
-		'nodes'
+		'nodes',
+		'clocks'
 	],
 	#category : 'Rhizome-Discovery-Tests',
 	#package : 'Rhizome-Discovery-Tests'
@@ -46,6 +47,8 @@ RZDiscoverySimulationTest >> addNodeNamed: aSymbol port: anInteger gossipPort: g
 		port: gossipPort;
 		devsServer: server;
 		yourself.
+	"Its own clock, driven by the model rather than by the wall clock."
+	clocks at: aSymbol put: (gossiper clock: GossipManualClock new; clock).
 	node gossiper: gossiper.
 	"A node says what it is as it comes up; a gossiper knows nobody, not even
 	itself, until it first touches its own state, and announcing does that."
@@ -70,6 +73,31 @@ RZDiscoverySimulationTest >> at: aTime do: aBlock [
 		name: ('once' , aTime printString) asSymbol;
 		period: aTime;
 		onTickDo: [ :time | done ifFalse: [ done := true. aBlock value ] ];
+		yourself)
+]
+
+{ #category : 'accessing' }
+RZDiscoverySimulationTest >> clockOf: aSymbol [
+	^ clocks at: aSymbol
+]
+
+{ #category : 'accessing' }
+RZDiscoverySimulationTest >> lastSeenAt: observerName of: memberName [
+	^ (self node: observerName) discovery lastSeen: (self node: memberName) gossipEndpoint
+]
+
+{ #category : 'running' }
+RZDiscoverySimulationTest >> letTheClocksFollowTheSimulation [
+	"Each gossiper reads the time from a clock of its own, and here they all follow
+	the model's clock: one tick is one second. Without this the timestamps would
+	come from the wall clock, which has nothing to do with what the run is doing."
+	| start |
+	start := DateAndTime year: 2026 month: 9 day: 22.
+	network addComponent: (DEVSPluggableTrigger new
+		name: #clocks;
+		period: 1;
+		onTickDo: [ :time |
+			clocks valuesDo: [ :each | each now: start + time seconds ] ];
 		yourself)
 ]
 
@@ -108,10 +136,24 @@ RZDiscoverySimulationTest >> setUp [
 	router is in place at that moment."
 	router := network router: DEVSFaultInjectingNetworkRouter new.
 	nodes := Dictionary new.
+	clocks := Dictionary new.
 	self addNodeNamed: #node1 port: 4851 gossipPort: 9001 type: #base every: 20.
 	self addNodeNamed: #node2 port: 4852 gossipPort: 9002 type: #account every: 25.
 	self addNodeNamed: #node3 port: 4853 gossipPort: 9003 type: #metabase every: 30.
-	self seedEveryNodeWithEveryOther
+	self seedEveryNodeWithEveryOther.
+	self letTheClocksFollowTheSimulation
+]
+
+{ #category : 'tests' }
+RZDiscoverySimulationTest >> testAMemberNeverHeardOfHasNoTimestamp [
+	"nil is the answer to 'never heard of', and it has to stay distinguishable
+	from 'heard of long ago' - otherwise the first consumer cannot tell a member
+	that is starting up from one that has stopped."
+	router simulateNetworkPartition: '9002' and: '9001'.
+	router simulateNetworkPartition: '9002' and: '9003'.
+	self runSimulationFor: 400.
+	self assert: (self lastSeenAt: #node1 of: #node2) isNil.
+	self assert: (self lastSeenAt: #node1 of: #node3) notNil
 ]
 
 { #category : 'tests' }
@@ -149,6 +191,31 @@ RZDiscoverySimulationTest >> testEveryNodeSeesEveryMember [
 	self runSimulationFor: 200.
 	nodes valuesDo: [ :each |
 		self assert: each discovery size equals: 3 ]
+]
+
+{ #category : 'tests' }
+RZDiscoverySimulationTest >> testLastSeenStandsStillWhileAMemberIsCutOffAndMovesAgainAfterwards [
+	"The timestamp does what it says: it stops moving while nothing is heard from
+	that member, and picks up again once it is. It does not jump, and it does not
+	freeze for good - and nowhere does anything conclude from it that the member
+	is gone.
+
+	The two readings during the partition are taken from inside the run; without
+	them the test would only show the happy end and would stay green even if the
+	timestamp had never stood still."
+	| whileCutOff stillCutOff |
+	self at: 150 do: [
+		router simulateNetworkPartition: '9002' and: '9001'.
+		router simulateNetworkPartition: '9002' and: '9003' ].
+	self at: 200 do: [ whileCutOff := self lastSeenAt: #node1 of: #node2 ].
+	self at: 290 do: [ stillCutOff := self lastSeenAt: #node1 of: #node2 ].
+	self at: 300 do: [
+		router healPartition: '9002' and: '9001'.
+		router healPartition: '9002' and: '9003' ].
+	self runSimulationFor: 400.
+	self assert: whileCutOff notNil.
+	self assert: stillCutOff equals: whileCutOff.
+	self assert: (self lastSeenAt: #node1 of: #node2) > stillCutOff
 ]
 
 { #category : 'tests' }
