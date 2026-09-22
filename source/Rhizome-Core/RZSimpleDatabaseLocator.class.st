@@ -2,18 +2,18 @@ Class {
 	#name : 'RZSimpleDatabaseLocator',
 	#superclass : 'Object',
 	#instVars : [
-		'node'
+		'host'
 	],
 	#category : 'Rhizome-Core',
 	#package : 'Rhizome-Core'
 }
 
 { #category : 'accessing' }
-RZSimpleDatabaseLocator >> node: aRZNode [ 
-	node := aRZNode 
+RZSimpleDatabaseLocator >> host: aRZHost [ 
+	host := aRZHost 
 ]
 
 { #category : 'as yet unclassified' }
 RZSimpleDatabaseLocator >> pathForId: aString [ 
-	^ node basePath / aString
+	^ host basePath / aString
 ]

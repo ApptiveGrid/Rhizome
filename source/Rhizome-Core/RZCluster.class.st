@@ -3,32 +3,32 @@ Class {
 	#superclass : 'Object',
 	#instVars : [
 		'localAddress',
-		'nodes',
 		'placementStrategy',
 		'network',
 		'hostLeaseManager',
-		'ownershipStore'
+		'ownershipStore',
+		'hosts'
 	],
 	#category : 'Rhizome-Core',
 	#package : 'Rhizome-Core'
 }
 
 { #category : 'adding' }
-RZCluster >> addNode: aRZNode [ 
-	aRZNode cluster: self.
-	nodes add: aRZNode 
+RZCluster >> addHost: aRZHost [ 
+	aRZHost cluster: self.
+	hosts add: aRZHost 
 ]
 
 { #category : 'as yet unclassified' }
 RZCluster >> announceAll [
-	self remoteNodes do: [ :node | 
-		network announce: self localVirtualNode to: node address  ]
+	self remoteHosts do: [ :host | 
+		network announce: self localNode to: host address  ]
 ]
 
 { #category : 'as yet unclassified' }
-RZCluster >> buildNodesFromList: aCollection [ 
+RZCluster >> buildHostsFromList: aCollection [ 
 	aCollection do: [ :assoc | 
-		self addNode: ((assoc value = localAddress)
+		self addHost: ((assoc value = localAddress)
 			ifTrue: [  RZLocalHost name: assoc key address: assoc value ]
 			ifFalse: [ RZRemoteHost name: assoc key address: assoc value ]) ]
 ]
@@ -43,7 +43,7 @@ RZCluster >> hostLeaseManager [
 	^ hostLeaseManager ifNil: [
 		hostLeaseManager := RZHostLeaseManager new
 			store: self ownershipStore;
-			selfHost: self localNode name;
+			selfHost: self localHost name;
 			yourself ]
 ]
 
@@ -52,10 +52,54 @@ RZCluster >> hostLeaseManager: aManager [
 	hostLeaseManager := aManager
 ]
 
+{ #category : 'as yet unclassified' }
+RZCluster >> hostNameForKey: aString [ 
+	^ self hostWithName: (self placementStrategy hostNameForKey: aString)  
+]
+
+{ #category : 'private - tree building' }
+RZCluster >> hostNamed: aString [ 
+	^ hosts detect: [ :each | each hasName: aString ]
+]
+
+{ #category : 'as yet unclassified' }
+RZCluster >> hostNames [
+	^ hosts collect: #name
+]
+
+{ #category : 'as yet unclassified' }
+RZCluster >> hostWithAddress: anAddress [ 
+	^ hosts 
+		detect: [ :each | each address = anAddress ]
+		ifNone: [ nil ]
+]
+
+{ #category : 'as yet unclassified' }
+RZCluster >> hostWithAddress: anAddress andPort: aPort [ 
+	^ hosts 
+		detect: [ :each | each address = anAddress and: [ each port = aPort ] ]
+		ifNone: [ nil ]
+]
+
+{ #category : 'flow interface' }
+RZCluster >> hostWithName: aString [ 
+	^ hosts detect: [ :host | host name = aString  ]
+]
+
+{ #category : 'accessing' }
+RZCluster >> hosts [
+	^ hosts
+]
+
+{ #category : 'accessing' }
+RZCluster >> hosts: aCollection [ 
+	hosts := aCollection 
+]
+
 { #category : 'initialization' }
 RZCluster >> initialize [ 
 	super initialize.
-	nodes := OrderedCollection new
+	hosts := OrderedCollection new
 ]
 
 { #category : 'accessing' }
@@ -64,13 +108,13 @@ RZCluster >> localAddress: aString [
 ]
 
 { #category : 'as yet unclassified' }
-RZCluster >> localNode [
-	^ self nodeWithAddress: localAddress 
+RZCluster >> localHost [
+	^ self hostWithAddress: localAddress 
 ]
 
 { #category : 'as yet unclassified' }
-RZCluster >> localVirtualNode [
-	^ self localNode localVirtualNode 
+RZCluster >> localNode [
+	^ self localHost localNode 
 ]
 
 { #category : 'accessing' }
@@ -83,50 +127,6 @@ RZCluster >> network [
 RZCluster >> network: anObject [
 
 	network := anObject
-]
-
-{ #category : 'as yet unclassified' }
-RZCluster >> nodeNameForKey: aString [ 
-	^ self nodeWithName: (self placementStrategy nodeNameForKey: aString)  
-]
-
-{ #category : 'private - tree building' }
-RZCluster >> nodeNamed: aString [ 
-	^ nodes detect: [ :each | each hasName: aString ]
-]
-
-{ #category : 'as yet unclassified' }
-RZCluster >> nodeNames [
-	^ nodes collect: #name
-]
-
-{ #category : 'as yet unclassified' }
-RZCluster >> nodeWithAddress: anAddress [ 
-	^ nodes 
-		detect: [ :each | each address = anAddress ]
-		ifNone: [ nil ]
-]
-
-{ #category : 'as yet unclassified' }
-RZCluster >> nodeWithAddress: anAddress andPort: aPort [ 
-	^ nodes 
-		detect: [ :each | each address = anAddress and: [ each port = aPort ] ]
-		ifNone: [ nil ]
-]
-
-{ #category : 'flow interface' }
-RZCluster >> nodeWithName: aString [ 
-	^ nodes detect: [ :node | node name = aString  ]
-]
-
-{ #category : 'accessing' }
-RZCluster >> nodes [
-	^ nodes
-]
-
-{ #category : 'accessing' }
-RZCluster >> nodes: aCollection [ 
-	nodes := aCollection 
 ]
 
 { #category : 'as yet unclassified' }
@@ -154,20 +154,20 @@ RZCluster >> placementStrategy [
 ]
 
 { #category : 'as yet unclassified' }
-RZCluster >> remoteNodes [
-	^ nodes copyWithout: self localNode 
+RZCluster >> remoteHosts [
+	^ hosts copyWithout: self localHost 
 ]
 
 { #category : 'as yet unclassified' }
 RZCluster >> replicaSetForKey: aString [ 
 	| replicaSet |
 	replicaSet := RZReplicaSet new key: aString; cluster: self.
-	(self placementStrategy nodeNamesForKey: aString) do: [ :name | | replica |
-		replica := (name = self localNode name)
+	(self placementStrategy hostNamesForKey: aString) do: [ :name | | replica |
+		replica := (name = self localHost name)
 			ifTrue: [ RZLocalReplica new ]
 			ifFalse: [ RZRemoteReplica new ].
 		replicaSet addReplica: (replica
 			replicaSet: replicaSet;
-			virtualNode: ((self nodeWithName: name) resolveVirtualNodeForKey: aString) ) ].
+			node: ((self hostWithName: name) resolveNodeForKey: aString) ) ].
 	^ replicaSet 
 ]

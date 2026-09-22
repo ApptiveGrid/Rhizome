@@ -10,12 +10,7 @@ Class {
 }
 
 { #category : 'accessing' }
-RZSimulatedTest >> localAddress [
-	^ '127.0.0.1'
-]
-
-{ #category : 'accessing' }
-RZSimulatedTest >> nodeList [ 
+RZSimulatedTest >> hostList [ 
 	^ { 
 		#node1 -> '127.0.0.1'. 
 		#node2 -> '127.0.0.2'. 
@@ -25,18 +20,23 @@ RZSimulatedTest >> nodeList [
 		}
 ]
 
+{ #category : 'accessing' }
+RZSimulatedTest >> localAddress [
+	^ '127.0.0.1'
+]
+
 { #category : 'running' }
 RZSimulatedTest >> setUp [ 
 	super setUp.
 	network := RZSimulatedNetwork new. 
-	self nodeList do: [ :assoc | | cluster |
+	self hostList do: [ :assoc | | cluster |
 		cluster := RZCluster new 
 			localAddress: assoc value;
-			buildNodesFromList: self nodeList.
+			buildHostsFromList: self hostList.
 		cluster network: network.
-		cluster localNode 
+		cluster localHost 
 			basePath: ('rhizome/', assoc value asString);
-			registerNode;
+			registerHost;
 			registerOnPort: 5555 ]. 
 	"clusters do: #announceAll."
 	network hosts do: [ :host | 
@@ -53,10 +53,10 @@ RZSimulatedTest >> tearDown [
 
 { #category : 'tests' }
 RZSimulatedTest >> testResolveReplicaSet [
-	| set db txn virtualNode |
-	virtualNode := ((network addressAt: '127.0.0.1') at: 5555) virtualNode.
-	virtualNode node createDatabaseWithId: '012345'.
-	set := virtualNode cluster replicaSetForKey: '012345'.
+	| set db txn node |
+	node := ((network addressAt: '127.0.0.1') at: 5555) node.
+	node host createDatabaseWithId: '012345'.
+	set := node cluster replicaSetForKey: '012345'.
 	db := set replicas first soil.
 	txn := db newTransaction.
 	txn root: Dictionary new.

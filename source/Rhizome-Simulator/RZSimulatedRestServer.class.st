@@ -2,7 +2,7 @@ Class {
 	#name : 'RZSimulatedRestServer',
 	#superclass : 'Object',
 	#instVars : [
-		'virtualNode'
+		'node'
 	],
 	#category : 'Rhizome-Simulator',
 	#package : 'Rhizome-Simulator'
@@ -11,7 +11,7 @@ Class {
 { #category : 'running' }
 RZSimulatedRestServer >> apiHandler [ 
 	^ RZRestServerDelegate new 
-		virtualNode: virtualNode;
+		node: node;
 		uriSpace: (ZnCallHierarchyRestUriSpace new
 			rootClass: RZRestCall)
 ]
@@ -23,7 +23,7 @@ RZSimulatedRestServer >> apiPrefix [
 
 { #category : 'public - layout' }
 RZSimulatedRestServer >> cluster [
-	^ virtualNode cluster 
+	^ node cluster 
 ]
 
 { #category : 'options' }
@@ -49,16 +49,16 @@ RZSimulatedRestServer >> handler [
 ]
 
 { #category : 'accessing' }
+RZSimulatedRestServer >> node [
+	^ node
+]
+
+{ #category : 'accessing' }
+RZSimulatedRestServer >> node: aRZLocalNode [ 
+	node := aRZLocalNode 
+]
+
+{ #category : 'accessing' }
 RZSimulatedRestServer >> port [
-	^ virtualNode port
-]
-
-{ #category : 'accessing' }
-RZSimulatedRestServer >> virtualNode [
-	^ virtualNode
-]
-
-{ #category : 'accessing' }
-RZSimulatedRestServer >> virtualNode: aRZLocalNode [ 
-	virtualNode := aRZLocalNode 
+	^ node port
 ]

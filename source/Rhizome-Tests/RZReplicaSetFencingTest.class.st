@@ -17,20 +17,20 @@ RZReplicaSetFencingTest >> setUp [
 	super setUp.
 	cluster := RZCluster new.
 	cluster localAddress: '127.0.0.1'.
-	cluster buildNodesFromList: { #hostA -> '127.0.0.1'. #hostB -> '10.0.0.2' }.
+	cluster buildHostsFromList: { #hostA -> '127.0.0.1'. #hostB -> '10.0.0.2' }.
 	cluster ownershipStore: RZInMemoryOwnershipStore new.
 
-	localHost := cluster localNode.
-	localImage := RZLocalImage port: 9001.
-	localHost addVirtualNode: localImage.
+	localHost := cluster localHost.
+	localImage := RZLocalNode port: 9001.
+	localHost addNode: localImage.
 
-	remoteHost := cluster nodeWithName: #hostB.
-	remoteImage := RZRemoteImage port: 9002.
-	remoteHost addVirtualNode: remoteImage.
+	remoteHost := cluster hostWithName: #hostB.
+	remoteImage := RZRemoteNode port: 9002.
+	remoteHost addNode: remoteImage.
 
 	replicaSet := RZReplicaSet new key: #db1; cluster: cluster; yourself.
-	localReplica := RZLocalReplica new replicaSet: replicaSet; virtualNode: localImage; yourself.
-	remoteReplica := RZRemoteReplica new replicaSet: replicaSet; virtualNode: remoteImage; yourself.
+	localReplica := RZLocalReplica new replicaSet: replicaSet; node: localImage; yourself.
+	remoteReplica := RZRemoteReplica new replicaSet: replicaSet; node: remoteImage; yourself.
 	replicaSet addReplica: localReplica.
 	replicaSet addReplica: remoteReplica
 ]

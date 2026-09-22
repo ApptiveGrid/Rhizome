@@ -10,7 +10,7 @@ Class {
 
 { #category : 'as yet unclassified' }
 RZRequestRouter >> candidateHostNamesFor: dbId [
-	^ cluster placementStrategy nodeNamesForKey: dbId
+	^ cluster placementStrategy hostNamesForKey: dbId
 ]
 
 { #category : 'as yet unclassified' }
@@ -39,17 +39,17 @@ RZRequestRouter >> forward: aZnRequest to: anImage [
 ]
 
 { #category : 'as yet unclassified' }
-RZRequestRouter >> imageForHostNamed: hostName key: dbId [
-	"Which specific Pharo image on that host holds dbId - deferred gap, see
-	Rhizome spec.md Cluster/Node/Hashing: resolveVirtualNodeForKey: still
-	assumes one image per host (anyOne). Fine for the current test setup,
-	needs the Local File Lock read once multiple images per host are real."
-	^ (cluster nodeWithName: hostName) resolveVirtualNodeForKey: dbId
+RZRequestRouter >> isEligibleCandidateFor: dbId [
+	^ (self candidateHostNamesFor: dbId) includes: cluster hostLeaseManager selfHost
 ]
 
 { #category : 'as yet unclassified' }
-RZRequestRouter >> isEligibleCandidateFor: dbId [
-	^ (self candidateHostNamesFor: dbId) includes: cluster hostLeaseManager selfHost
+RZRequestRouter >> nodeForHostNamed: hostName key: dbId [
+	"Which specific Pharo image on that host holds dbId - deferred gap, see
+	Rhizome spec.md Cluster/Node/Hashing: resolveNodeForKey: still
+	assumes one image per host (anyOne). Fine for the current test setup,
+	needs the Local File Lock read once multiple images per host are real."
+	^ (cluster hostWithName: hostName) resolveNodeForKey: dbId
 ]
 
 { #category : 'as yet unclassified' }
@@ -65,10 +65,10 @@ RZRequestRouter >> resolveFor: dbId [
 
 	record := cluster ownershipStore read: dbId.
 	(record notNil and: [ record leaseUntil > cluster hostLeaseManager clock now ])
-		ifTrue: [ ^ RZRoutingDecision forward: (self imageForHostNamed: record primaryHost key: dbId) ].
+		ifTrue: [ ^ RZRoutingDecision forward: (self nodeForHostNamed: record primaryHost key: dbId) ].
 
 	(self isEligibleCandidateFor: dbId)
-		ifFalse: [ ^ RZRoutingDecision forward: (self imageForHostNamed: (self candidateHostNamesFor: dbId) first key: dbId) ].
+		ifFalse: [ ^ RZRoutingDecision forward: (self nodeForHostNamed: (self candidateHostNamesFor: dbId) first key: dbId) ].
 
 	promoted := cluster hostLeaseManager tryPromoteFor: dbId.
 	promoted ifNotNil: [ ^ RZRoutingDecision local ].
@@ -76,7 +76,7 @@ RZRequestRouter >> resolveFor: dbId [
 	winner := cluster ownershipStore read: dbId.
 	^ winner
 		ifNil: [ RZRoutingDecision retry ]
-		ifNotNil: [ RZRoutingDecision forward: (self imageForHostNamed: winner primaryHost key: dbId) ]
+		ifNotNil: [ RZRoutingDecision forward: (self nodeForHostNamed: winner primaryHost key: dbId) ]
 ]
 
 { #category : 'as yet unclassified' }
@@ -86,6 +86,6 @@ RZRequestRouter >> route: aZnRequest dbId: dbId localHandler: aBlock [
 	| decision |
 	decision := self resolveFor: dbId.
 	decision isLocal ifTrue: [ ^ aBlock value: aZnRequest ].
-	decision isForward ifTrue: [ ^ self forward: aZnRequest to: decision targetImage ].
+	decision isForward ifTrue: [ ^ self forward: aZnRequest to: decision targetNode ].
 	^ ZnResponse serviceUnavailable: 'primary not yet determined, retry'
 ]

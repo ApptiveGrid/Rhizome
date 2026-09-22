@@ -18,9 +18,9 @@ RZSimulatedZincClient >> entity: aZnByteArrayEntity [
 
 { #category : 'public' }
 RZSimulatedZincClient >> get [
-	| targetVirtualNode |
-	targetVirtualNode := (network virtualNodeWithAddress: url host port: url port).
-	response := targetVirtualNode handleRequest: (self request method: #GET) 
+	| targetNode |
+	targetNode := (network nodeWithAddress: url host port: url port).
+	response := targetNode handleRequest: (self request method: #GET) 
 ]
 
 { #category : 'accessing' }
@@ -30,9 +30,9 @@ RZSimulatedZincClient >> network: aRZSimulatedNetwork [
 
 { #category : 'public' }
 RZSimulatedZincClient >> post [
-	| targetVirtualNode |
-	targetVirtualNode := (network virtualNodeWithAddress: url host port: url port).
-	response := targetVirtualNode handleRequest: (self request method: #POST ) 
+	| targetNode |
+	targetNode := (network nodeWithAddress: url host port: url port).
+	response := targetNode handleRequest: (self request method: #POST ) 
 ]
 
 { #category : 'accessing' }

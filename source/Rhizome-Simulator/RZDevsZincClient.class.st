@@ -18,10 +18,10 @@ RZDevsZincClient >> entity: aZnByteArrayEntity [
 
 { #category : 'as yet unclassified' }
 RZDevsZincClient >> get [
-	| targetVirtualNode |
+	| targetNode |
 	network checkDeliverableTo: url host.
-	targetVirtualNode := (network virtualNodeWithAddress: url host port: url port).
-	response := targetVirtualNode handleRequest: (self request method: #GET)
+	targetNode := (network nodeWithAddress: url host port: url port).
+	response := targetNode handleRequest: (self request method: #GET)
 ]
 
 { #category : 'as yet unclassified' }
@@ -31,10 +31,10 @@ RZDevsZincClient >> network: aRZDevsSimulatedNetwork [
 
 { #category : 'as yet unclassified' }
 RZDevsZincClient >> post [
-	| targetVirtualNode |
+	| targetNode |
 	network checkDeliverableTo: url host.
-	targetVirtualNode := (network virtualNodeWithAddress: url host port: url port).
-	response := targetVirtualNode handleRequest: (self request method: #POST)
+	targetNode := (network nodeWithAddress: url host port: url port).
+	response := targetNode handleRequest: (self request method: #POST)
 ]
 
 { #category : 'as yet unclassified' }

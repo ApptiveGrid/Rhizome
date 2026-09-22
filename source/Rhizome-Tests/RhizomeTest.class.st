@@ -9,12 +9,7 @@ Class {
 }
 
 { #category : 'accessing' }
-RhizomeTest >> localAddress [
-	^ '127.0.0.1'
-]
-
-{ #category : 'accessing' }
-RhizomeTest >> nodeList [ 
+RhizomeTest >> hostList [ 
 	^ { 
 		#node1 -> '127.0.0.1'. 
 		#node2 -> '127.0.0.2'. 
@@ -24,51 +19,56 @@ RhizomeTest >> nodeList [
 		}
 ]
 
+{ #category : 'accessing' }
+RhizomeTest >> localAddress [
+	^ '127.0.0.1'
+]
+
 { #category : 'running' }
 RhizomeTest >> setUp [ 
 	super setUp.
 	cluster := RZCluster new 
 		localAddress: self localAddress;
-		buildNodesFromList: self nodeList 
+		buildHostsFromList: self hostList 
 ]
 
 { #category : 'tests' }
-RhizomeTest >> testAddVirtualNode [ 
-	cluster localNode addVirtualNodeWithPort: 10000.
-	self assert: cluster localNode virtualNodes size equals: 1
+RhizomeTest >> testAddNode [ 
+	cluster localHost addNodeWithPort: 10000.
+	self assert: cluster localHost nodes size equals: 1
 ]
 
 { #category : 'tests' }
-RhizomeTest >> testDispatchToVirtualNode [ 
-	| virtualNode targetNode |
-	cluster nodes do: [ :node | node addVirtualNodeWithPort: 10000 ].
-	virtualNode := cluster localNode virtualNodeWithPort: 10000.
-	targetNode := virtualNode targetVirtualNodeFor: '012345'.
-	self assert: virtualNode equals: targetNode
+RhizomeTest >> testDispatchToNode [ 
+	| node targetNode |
+	cluster hosts do: [ :host | host addNodeWithPort: 10000 ].
+	node := cluster localHost nodeWithPort: 10000.
+	targetNode := node targetNodeFor: '012345'.
+	self assert: node equals: targetNode
 ]
 
 { #category : 'as yet unclassified' }
-RhizomeTest >> testHandlesKeyDistinguishesImagesOnSameAndOtherHosts [
+RhizomeTest >> testHandlesKeyDistinguishesNodesOnSameAndOtherHosts [
 	| winnerHost winnerImage otherImageSameHost otherHost otherHostImage |
-	cluster nodes do: [ :node | node addVirtualNodeWithPort: 10000; addVirtualNodeWithPort: 20000 ].
-	winnerHost := cluster nodeNameForKey: 'db-1'.
-	winnerImage := winnerHost resolveVirtualNodeForKey: 'db-1'.
-	otherImageSameHost := winnerHost virtualNodes detect: [ :each | each ~~ winnerImage ].
-	otherHost := cluster nodes detect: [ :each | each ~~ winnerHost ].
-	otherHostImage := otherHost virtualNodes first.
+	cluster hosts do: [ :host | host addNodeWithPort: 10000; addNodeWithPort: 20000 ].
+	winnerHost := cluster hostNameForKey: 'db-1'.
+	winnerImage := winnerHost resolveNodeForKey: 'db-1'.
+	otherImageSameHost := winnerHost nodes detect: [ :each | each ~~ winnerImage ].
+	otherHost := cluster hosts detect: [ :each | each ~~ winnerHost ].
+	otherHostImage := otherHost nodes first.
 	self assert: (winnerImage handlesKey: 'db-1').
 	self deny: (otherImageSameHost handlesKey: 'db-1').
 	self deny: (otherHostImage handlesKey: 'db-1')
 ]
 
 { #category : 'as yet unclassified' }
-RhizomeTest >> testLocalImageStartsAndStopsItsPeriodicWork [
-	"Builds the RZLocalImage directly: RZHost>>virtualNodeClass answers the
-	abstract RZImage for local and remote hosts alike, so addVirtualNodeWithPort:
+RhizomeTest >> testLocalNodeStartsAndStopsItsPeriodicWork [
+	"Builds the RZLocalNode directly: RZHost>>nodeClass answers the
+	abstract RZNode for local and remote hosts alike, so addNodeWithPort:
 	would not give us a local one."
 	| image |
-	image := RZLocalImage port: 10000.
-	cluster localNode addVirtualNode: image.
+	image := RZLocalNode port: 10000.
+	cluster localHost addNode: image.
 	self deny: image isRunning.
 	image start.
 	self assert: image isRunning.
@@ -76,22 +76,22 @@ RhizomeTest >> testLocalImageStartsAndStopsItsPeriodicWork [
 	self deny: image isRunning
 ]
 
+{ #category : 'as yet unclassified' }
+RhizomeTest >> testResolveNodeForKeyIsDeterministicAndUsesBothNodes [
+	| host imageCounts keys |
+	cluster hosts do: [ :host | host addNodeWithPort: 10000; addNodeWithPort: 20000 ].
+	host := cluster localHost.
+	keys := (1 to: 30) collect: [ :i | 'db-', i printString ].
+	self assert: (keys allSatisfy: [ :k | (host resolveNodeForKey: k) == (host resolveNodeForKey: k) ]).
+	imageCounts := (keys collect: [ :k | (host resolveNodeForKey: k) port ]) asSet.
+	self assert: imageCounts size equals: 2
+]
+
 { #category : 'tests' }
 RhizomeTest >> testResolveReplicaSet [
 	| set |
-	cluster nodes do: [ :node | node addVirtualNodeWithPort: 10000 ].
+	cluster hosts do: [ :host | host addNodeWithPort: 10000 ].
 	set := cluster replicaSetForKey: '012345'.
 	self assert: set size equals: 3.
-	self assert: cluster nodes first equals: cluster localNode
-]
-
-{ #category : 'as yet unclassified' }
-RhizomeTest >> testResolveVirtualNodeForKeyIsDeterministicAndUsesBothImages [
-	| host imageCounts keys |
-	cluster nodes do: [ :node | node addVirtualNodeWithPort: 10000; addVirtualNodeWithPort: 20000 ].
-	host := cluster localNode.
-	keys := (1 to: 30) collect: [ :i | 'db-', i printString ].
-	self assert: (keys allSatisfy: [ :k | (host resolveVirtualNodeForKey: k) == (host resolveVirtualNodeForKey: k) ]).
-	imageCounts := (keys collect: [ :k | (host resolveVirtualNodeForKey: k) port ]) asSet.
-	self assert: imageCounts size equals: 2
+	self assert: cluster hosts first equals: cluster localHost
 ]
