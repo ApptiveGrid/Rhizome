@@ -29,6 +29,15 @@ RZNodeDiscoveryTest >> setUp [
 ]
 
 { #category : 'tests' }
+RZNodeDiscoveryTest >> testASeedListMayContainTheNodeItself [
+	"Gossip leaves itself out when it picks whom to talk to, so a deployment can
+	hand every node the same list."
+	node seedsFromConfiguration: '127.0.0.1:9001, 10.10.1.3'.
+	self assert: (node seeds includes: node gossipEndpoint).
+	self deny: (node gossiper randomNodes includes: node gossipEndpoint)
+]
+
+{ #category : 'tests' }
 RZNodeDiscoveryTest >> testAnnouncesItsType [
 	node announceType.
 	self assert: (gossiper stateAt: RZNode typeKey) equals: #base
@@ -64,6 +73,16 @@ RZNodeDiscoveryTest >> testPublishesTheAddressOfItsHostAndNotTheMachineName [
 ]
 
 { #category : 'tests' }
+RZNodeDiscoveryTest >> testReadsASeedListFromConfiguration [
+	| seeds |
+	seeds := RZDiscovery seedsFrom: '10.10.1.2, 10.10.1.3:1998'.
+	self assert: seeds size equals: 2.
+	self assert: seeds first address equals: (NetNameResolver addressForName: '10.10.1.2').
+	self assert: seeds first port equals: GossipServer new defaultPort.
+	self assert: seeds second port equals: 1998
+]
+
+{ #category : 'tests' }
 RZNodeDiscoveryTest >> testReadsTheTypeAnotherNodeAnnounced [
 	| other state |
 	other := GossipEndpoint address: (NetNameResolver addressForName: '127.0.0.2') port: 9001.
@@ -72,4 +91,17 @@ RZNodeDiscoveryTest >> testReadsTheTypeAnotherNodeAnnounced [
 	self assert: (node typeOfMember: other) isNil.
 	state applicationStateAt: RZNode typeKey put: #metabase.
 	self assert: (node typeOfMember: other) equals: #metabase
+]
+
+{ #category : 'tests' }
+RZNodeDiscoveryTest >> testSeedListToleratesSpacingAndTrailingSeparators [
+	self assert: (RZDiscovery seedsFrom: '  10.10.1.2 ,, 10.10.1.3 , ') size equals: 2.
+	self assert: (RZDiscovery seedsFrom: '') isEmpty
+]
+
+{ #category : 'tests' }
+RZNodeDiscoveryTest >> testTakesItsSeedsFromConfiguration [
+	node seedsFromConfiguration: '10.10.1.2, 10.10.1.3:1998'.
+	self assert: node seeds size equals: 2.
+	self assert: node gossiper seedNodes equals: node seeds
 ]

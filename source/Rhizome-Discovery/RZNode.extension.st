@@ -51,6 +51,25 @@ RZNode >> publishedAddress [
 ]
 
 { #category : '*Rhizome-Discovery' }
+RZNode >> seeds [
+	"Where this node starts asking. Answers gossip endpoints."
+	^ gossiper seedNodes
+]
+
+{ #category : '*Rhizome-Discovery' }
+RZNode >> seeds: aCollectionOfEndpoints [
+	"Configured, not discovered: these are only the endpoints gossip turns to
+	first. A node may be in its own seed list; gossip leaves itself out when it
+	picks whom to talk to."
+	gossiper seedNodes: aCollectionOfEndpoints
+]
+
+{ #category : '*Rhizome-Discovery' }
+RZNode >> seedsFromConfiguration: aString [
+	self seeds: (RZDiscovery seedsFrom: aString)
+]
+
+{ #category : '*Rhizome-Discovery' }
 RZNode >> startGossiping [
 	gossiper start
 ]
