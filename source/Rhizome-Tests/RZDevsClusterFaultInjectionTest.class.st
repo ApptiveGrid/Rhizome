@@ -39,7 +39,7 @@ RZDevsClusterFaultInjectionTest >> primaryClusterForKey: aKey [
 { #category : 'as yet unclassified' }
 RZDevsClusterFaultInjectionTest >> setUp [
 	super setUp.
-	router := RZDevsNetworkRouter new.
+	router := DEVSFaultInjectingNetworkRouter new.
 	sharedAddresses := Dictionary new.
 	clusters := self hostList collect: [ :assoc | | cluster network |
 		network := RZDevsSimulatedNetwork

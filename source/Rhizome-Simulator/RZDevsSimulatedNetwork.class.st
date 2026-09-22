@@ -132,8 +132,8 @@ RZDevsSimulatedNetwork >> router [
 ]
 
 { #category : 'as yet unclassified' }
-RZDevsSimulatedNetwork >> router: aRZDevsNetworkRouter [
-	router := aRZDevsNetworkRouter
+RZDevsSimulatedNetwork >> router: aDEVSFaultInjectingNetworkRouter [
+	router := aDEVSFaultInjectingNetworkRouter
 ]
 
 { #category : 'as yet unclassified' }
