@@ -46,14 +46,18 @@ BaselineOfRhizome >> baseline: spec [
 
 { #category : 'as yet unclassified' }
 BaselineOfRhizome >> gossip: spec [
-	"The runtime group rather than Gossip's default, which is Core plus Simulation
+	"Pinned, not following main: an image that ships has to be determined by what is
+	written down. Two builds of one apptive-common commit were getting different
+	Gossip, which for a protocol spoken between images is the drift nobody looks for.
+
+	The runtime group rather than Gossip's default, which is Core plus Simulation
 	and brings both test packages - and with Gossip-Simulation-Tests, PharoDEVS.
 	Rhizome-Discovery-Tests reaches for DevsGossiper, and that lives in the Gossip
 	package itself, so the tests here lose nothing by it."
 
 	spec baseline: 'Gossip' with: [ 
 		spec 
-			repository: 'github://soil-fabric/Gossip:main/source';
+			repository: 'github://soil-fabric/Gossip:2ccbdfe73cc280f6a04f3e6a11cbc8962f454241/source';
 			loads: #('Runtime') ].
 	"And the test side, for the one package here that tests against gossip:
 	GossipManualClock is a test double and lives in Gossip-Tests, which the
