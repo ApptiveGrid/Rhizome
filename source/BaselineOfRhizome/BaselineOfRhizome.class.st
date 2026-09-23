@@ -34,17 +34,27 @@ BaselineOfRhizome >> baseline: spec [
 			spec
 				group: 'default' with: #('All');
 				group: 'Model' with: #('Rhizome-Core');
-				group: 'Discovery' with: #('Rhizome-Core' 'Rhizome-Discovery' 'Rhizome-Discovery-Tests');
+				"The discovery an image runs: the model and the discovery on top of it,
+				and no tests. It used to carry Rhizome-Discovery-Tests as well, and that
+				package requires PharoDEVS - so asking for discovery put a simulator in
+				the image. The tests have a group of their own now, and its name says so."
+				group: 'Discovery' with: #('Rhizome-Core' 'Rhizome-Discovery');
+				group: 'DiscoveryTests' with: #('Discovery' 'Rhizome-Discovery-Tests');
 				group: 'All' with: #('Rhizome-Core' 'Rhizome-Placement' 'Rhizome-Soil' 'Rhizome-Endpoints'
 					'Rhizome-Discovery' 'Rhizome-Discovery-Tests' 'Rhizome-Simulator' 'Rhizome-Tests') ]
 ]
 
 { #category : 'as yet unclassified' }
 BaselineOfRhizome >> gossip: spec [
+	"The runtime group rather than Gossip's default, which is Core plus Simulation
+	and brings both test packages - and with Gossip-Simulation-Tests, PharoDEVS.
+	Rhizome-Discovery-Tests reaches for DevsGossiper, and that lives in the Gossip
+	package itself, so the tests here lose nothing by it."
 
 	spec baseline: 'Gossip' with: [ 
 		spec 
-			repository: 'github://soil-fabric/Gossip:main/source' ]
+			repository: 'github://soil-fabric/Gossip:main/source';
+			loads: #('Runtime') ]
 ]
 
 { #category : 'as yet unclassified' }
