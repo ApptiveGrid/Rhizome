@@ -27,7 +27,7 @@ BaselineOfRhizome >> baseline: spec [
 				package: 'Rhizome-Soil' with: [ spec requires: #('Rhizome-Core' 'Soil') ];
 				package: 'Rhizome-Endpoints' with: [ spec requires: #('Rhizome-Core' 'ZincHTTPComponents') ];
 				package: 'Rhizome-Discovery' with: [ spec requires: #('Rhizome-Core' 'Gossip') ];
-				package: 'Rhizome-Discovery-Tests' with: [ spec requires: #('Rhizome-Discovery' 'PharoDEVS') ];
+				package: 'Rhizome-Discovery-Tests' with: [ spec requires: #('Rhizome-Discovery' 'GossipTests' 'PharoDEVS') ];
 				package: 'Rhizome-Simulator' with: [ spec requires: #('Rhizome-Core' 'Rhizome-Endpoints' 'PharoDEVS') ];
 				package: 'Rhizome-Tests' with: [ spec requires: #('Rhizome-Core' 'Rhizome-Placement' 'Rhizome-Soil' 'Rhizome-Endpoints' 'Rhizome-Simulator') ].
 
@@ -54,7 +54,14 @@ BaselineOfRhizome >> gossip: spec [
 	spec baseline: 'Gossip' with: [ 
 		spec 
 			repository: 'github://soil-fabric/Gossip:main/source';
-			loads: #('Runtime') ]
+			loads: #('Runtime') ].
+	"And the test side, for the one package here that tests against gossip:
+	GossipManualClock is a test double and lives in Gossip-Tests, which the
+	runtime group deliberately leaves out. Declared as a project of its own so
+	that asking for the tests cannot quietly put them in a deployed image."
+	spec
+		project: 'GossipTests' copyFrom: 'Gossip' with: [ 
+			spec loads: #('Core') ]
 ]
 
 { #category : 'as yet unclassified' }
