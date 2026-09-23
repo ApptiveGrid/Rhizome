@@ -73,6 +73,26 @@ RZNodeDiscoveryTest >> testPublishesTheAddressOfItsHostAndNotTheMachineName [
 ]
 
 { #category : 'tests' }
+RZNodeDiscoveryTest >> testReadsOneSeedFromConfiguration [
+	"What a deployment that can hand over a list uses, one entry at a time."
+
+	| seed |
+	seed := RZDiscovery seedFrom: '10.10.1.2:1998'.
+	self
+		assert: seed address
+		equals: (NetNameResolver addressForName: '10.10.1.2').
+	self assert: seed port equals: 1998
+]
+
+{ #category : 'tests' }
+RZNodeDiscoveryTest >> testOneSeedWithoutAPortTakesTheGossipDefault [
+
+	self
+		assert: (RZDiscovery seedFrom: ' 10.10.1.2 ') port
+		equals: GossipServer new defaultPort
+]
+
+{ #category : 'tests' }
 RZNodeDiscoveryTest >> testReadsASeedListFromConfiguration [
 	| seeds |
 	seeds := RZDiscovery seedsFrom: '10.10.1.2, 10.10.1.3:1998'.

@@ -23,26 +23,35 @@ RZDiscovery class >> on: aGossiper [
 ]
 
 { #category : 'instance creation' }
-RZDiscovery class >> seedsFrom: aString [
-	"Read a configured seed list into gossip endpoints. The form is what a
-	deployment can hand over on one line: addresses separated by commas, each
-	optionally with a port - '10.10.1.2, 10.10.1.3:1999'. Without a port the
-	gossip default is used, so the common case stays short.
+RZDiscovery class >> seedFrom: aString [
+	"One seed, written the way a deployment writes it: an address, optionally with a
+	port - '10.10.1.2' or '10.10.1.2:1999'. Without a port the gossip default is
+	used, so the common case stays short."
 
-	This replaces APPTIVE_PROXIES, which named the proxies every component had to
-	go through; a seed is only where gossip starts asking, and the list stops
-	being the membership as soon as more than the seeds are known."
-	| default |
-	default := GossipServer new defaultPort.
+	| parts |
+	parts := $: split: aString trimBoth.
+	^ GossipEndpoint
+		  address: (NetNameResolver addressForName: parts first trimBoth)
+		  port: (parts size > 1
+			   ifTrue: [ parts second trimBoth asInteger ]
+			   ifFalse: [ GossipServer new defaultPort ])
+]
+
+{ #category : 'instance creation' }
+RZDiscovery class >> seedsFrom: aString [
+	"A whole seed list on one line, addresses separated by commas -
+	'10.10.1.2, 10.10.1.3:1999'. One entry is #seedFrom:.
+
+	A deployment that can hand over a list hands over a list and uses that one per
+	entry; this is for the places where there is only a line to write in.
+
+	It replaces APPTIVE_PROXIES, which named the proxies every component had to go
+	through; a seed is only where gossip starts asking, and the list stops being the
+	membership as soon as more than the seeds are known."
+
 	^ (($, split: aString) collect: [ :each | each trimBoth ])
-		reject: [ :each | each isEmpty ]
-		thenCollect: [ :each | | parts |
-			parts := $: split: each.
-			GossipEndpoint
-				address: (NetNameResolver addressForName: parts first trimBoth)
-				port: (parts size > 1
-					ifTrue: [ parts second trimBoth asInteger ]
-					ifFalse: [ default ]) ]
+		  reject: [ :each | each isEmpty ]
+		  thenCollect: [ :each | self seedFrom: each ]
 ]
 
 { #category : 'accessing' }
