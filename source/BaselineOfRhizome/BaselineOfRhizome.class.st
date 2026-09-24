@@ -57,7 +57,7 @@ BaselineOfRhizome >> gossip: spec [
 
 	spec baseline: 'Gossip' with: [ 
 		spec 
-			repository: 'github://soil-fabric/Gossip:a0775b8da5a5ea61b83c7a3e9f7d53b9bc4facbf/source';
+			repository: 'github://soil-fabric/Gossip:d0f256019141326d87d31b3cdb0c3d45c787b502/source';
 			loads: #('Runtime') ].
 	"And the test side, for the one package here that tests against gossip:
 	GossipManualClock is a test double and lives in Gossip-Tests, which the
