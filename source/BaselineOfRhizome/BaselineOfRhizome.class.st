@@ -86,10 +86,24 @@ BaselineOfRhizome >> pharoDevs: spec [
 
 { #category : 'accessing' }
 BaselineOfRhizome >> soil: spec [
-	
+	"Pinned, for the same reason as Gossip: a build has to be determined by what is
+	written down. Following main meant this build changed whenever Soil did, and
+	because no group is named, Soil's own tests come along and run here - so Rhizome
+	went red on 2026-09-24 at SoilResidentTest>>testProcessRestartsStopAtTheLimit, a
+	test nobody here wrote, over a change nobody here made.
+
+	The commit is the one apptive-common pins. That is the Soil this ecosystem
+	runs, and naming the same one means the two cannot ask for different Soils of
+	the same project - which Metacello would settle by load order rather than by
+	anybody's decision.
+
+	The group is deliberately still open. Rhizome-Soil is about Soil, so what it
+	needs is more than a runtime group; narrowing it is a question of its own, and
+	pinning answers the one that was asked."
+
 	spec baseline: 'Soil' with: [ 
 		spec 
-			repository: 'github://ApptiveGrid/Soil:main/src' ]
+			repository: 'github://ApptiveGrid/Soil:5d64f0f05e8a7ca8f0f2de4779849ee966e4c114/src' ]
 ]
 
 { #category : 'baselines' }
