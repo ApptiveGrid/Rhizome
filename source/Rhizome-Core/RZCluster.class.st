@@ -114,8 +114,14 @@ RZCluster >> localNode [
 
 { #category : 'accessing' }
 RZCluster >> network [
-	^ network ifNil: [ 
-		network := self realNetwork ]
+	"What this cluster talks through, or a named error when it was given none.
+
+	It used to fall back to #realNetwork, which nobody ever wrote - so a cluster
+	without a network failed with a doesNotUnderstand on something missing, which
+	reads like a defect rather than like what it is. There is no real network yet;
+	only the simulator answers what Rhizome-Core sends here."
+
+	^ network ifNil: [ RZNoNetwork signal ]
 ]
 
 { #category : 'accessing' }
@@ -133,11 +139,6 @@ RZCluster >> ownershipStore [
 { #category : 'as yet unclassified' }
 RZCluster >> ownershipStore: aStore [
 	ownershipStore := aStore
-]
-
-{ #category : 'as yet unclassified' }
-RZCluster >> partitioner [
-	self shouldBeImplemented.
 ]
 
 { #category : 'as yet unclassified' }
