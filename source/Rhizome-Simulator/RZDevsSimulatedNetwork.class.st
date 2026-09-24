@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'localAddress',
 		'addresses',
-		'router'
+		'router',
+		'clusterSimulation'
 	],
 	#category : 'Rhizome-Simulator',
 	#package : 'Rhizome-Simulator'
@@ -114,6 +115,55 @@ RZDevsSimulatedNetwork >> nodeWithAddress: aString port: aNumber [
 	^ (addresses at: aString) at: aNumber
 ]
 
+{ #category : 'accessing' }
+RZDevsSimulatedNetwork >> clusterSimulation [
+	^ clusterSimulation
+]
+
+{ #category : 'accessing' }
+RZDevsSimulatedNetwork >> clusterSimulation: anRZDevsClusterSimulation [
+	"The one DEVS model the whole cluster runs in. With it, what is sent travels
+	through the router in the time of the model; without it, this network behaves as
+	it always did and the router is only asked whether it would have dropped the
+	message."
+
+	clusterSimulation := anRZDevsClusterSimulation.
+	router := anRZDevsClusterSimulation router
+]
+
+{ #category : 'sending' }
+RZDevsSimulatedNetwork >> deliver: aMessage [
+	"A message that came out of the router, on the far side. The request carries
+	host and port, so the node it is meant for is found the same way a direct call
+	found it."
+
+	| request |
+	request := aMessage payload.
+	^ (self nodeWithAddress: request url host port: request url port)
+		  handleRequest: request
+]
+
+{ #category : 'sending' }
+RZDevsSimulatedNetwork >> post: anEntity to: aUrl [
+	"Hand it to the router and go on. Whether it arrives - and when - is the
+	router's business now, which is why this no longer asks #checkDeliverableTo:
+	first: a partitioned send is a message that is dropped on the way, not a call
+	that refuses to be made.
+
+	Without a cluster simulation this is the old direct call, so a network built the
+	old way keeps working."
+
+	clusterSimulation ifNil: [ ^ super post: anEntity to: aUrl ].
+	clusterSimulation
+		sendFrom: localAddress
+		payload: (ZnRequest empty
+				 url: aUrl;
+				 method: #POST;
+				 entity: anEntity;
+				 yourself)
+		to: aUrl host
+]
+
 { #category : 'as yet unclassified' }
 RZDevsSimulatedNetwork >> registerCluster: cluster [
 	cluster hosts do: [ :host |
@@ -123,7 +173,13 @@ RZDevsSimulatedNetwork >> registerCluster: cluster [
 
 { #category : 'as yet unclassified' }
 RZDevsSimulatedNetwork >> registerHost: aRZHost [
-	addresses at: aRZHost address ifAbsentPut: [ Dictionary new ]
+	addresses at: aRZHost address ifAbsentPut: [ Dictionary new ].
+	"and as a host in the model, so that something sent to it has somewhere to
+	arrive. Only once per address - several clusters share one model."
+	clusterSimulation ifNotNil: [
+		clusterSimulation
+			hostAt: aRZHost address
+			deliverWith: [ :message | self deliver: message ] ]
 ]
 
 { #category : 'as yet unclassified' }
