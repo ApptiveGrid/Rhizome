@@ -100,6 +100,37 @@ RZDiscovery >> members [
 ]
 
 { #category : 'accessing' }
+RZDiscovery >> membersOfType: aSymbol [
+	"Every member that says it is of this kind, the local one included. Empty while
+	nothing of the kind has been heard of - an answer a caller has to be able to live
+	with, because it is also the answer during the first seconds of an image's life.
+
+	Says nothing about liveness, like everything here: a member listed has been heard
+	from, not that it is up. Whoever needs that asks #lastSeen:.
+
+	The order is whatever the endpoint table happens to hand out. Choosing among
+	several is the caller's business, and no answer here is a load balancer."
+
+	^ self members select: [ :each | (self typeOf: each) = aSymbol ]
+]
+
+{ #category : 'accessing' }
 RZDiscovery >> size [
 	^ self members size
+]
+
+{ #category : 'accessing' }
+RZDiscovery >> typeOf: aGossipEndpoint [
+	"What that member says it is - #base, #account, #metabase or #lurker - or nil
+	when nothing has been heard from it, or when it has been heard from but has said
+	nothing about its kind.
+
+	Not checked against RZNode class>>knownTypes: a wrong value travels rather than
+	being refused, and answering nil for it would hide it."
+
+	| state |
+	state := gossiper endpoints endpointStateAt: aGossipEndpoint ifAbsent: [ ^ nil ].
+	^ [ (state applicationStateAt: RZNode typeKey) value ]
+		  on: KeyNotFound
+		  do: [ nil ]
 ]
