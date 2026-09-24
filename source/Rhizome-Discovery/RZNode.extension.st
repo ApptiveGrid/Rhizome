@@ -86,10 +86,9 @@ RZNode class >> typeKey [
 
 { #category : '*Rhizome-Discovery' }
 RZNode >> typeOfMember: aGossipEndpoint [
-	"What another node says it is, or nil while nothing has been heard from it."
-	| state |
-	state := gossiper endpoints endpointStateAt: aGossipEndpoint ifAbsent: [ ^ nil ].
-	^ [ (state applicationStateAt: self class typeKey) value ]
-		on: KeyNotFound
-		do: [ nil ]
+	"What another node says it is, or nil while nothing has been heard from it.
+	The reading itself belongs to the discovery, which is also where asking the
+	other way round lives - RZDiscovery>>membersOfType:."
+
+	^ self discovery typeOf: aGossipEndpoint
 ]
