@@ -79,40 +79,56 @@ RZDiscovery >> endpointOfService: aServiceName on: aGossipEndpoint [
 
 { #category : 'accessing' }
 RZDiscovery >> membersWithDatabaseOpen: anId [
-	"Every member that says it holds that database open, the local one included.
+	"Every member that says it holds that database open, the local one included, in
+	whatever role. Which role each of them plays is #roleOf:on:.
 
 	A hint, and deliberately not more. Where a database *belongs* is not answered
 	here - rendezvous hashing gives the candidates and the ownership record gives
-	the truth, and that stays the only authority. What this answers is who has it
-	open at the moment, which is a different question and an operational one.
+	the truth, and that stays the only authority.
 
 	*Several answers are normal, and they do not say who may write.* In replication
 	mode a database is open on several images and full - primary - on exactly one;
-	the others hold a replica. Which one is primary is not in this answer, and
-	deliberately not: the ownership record says it, and a role published beside it
-	would be a second claim about the same thing.
-
-	What this is good for is therefore the other direction: seeing who has it open
-	at all, and noticing an image that never let go. Today, with replication not
-	deployed, more than one answer is already worth looking at - but that is a fact
-	about the deployment, not about the protocol."
+	the others hold a replica. Two of them calling themselves primary is the thing
+	worth seeing, and seeing it means asking #roleOf:on: for each, not counting the
+	members here."
 
 	^ self members select: [ :each |
-		  (self openDatabasesOf: each) includes: anId ]
+		  (self openDatabasesOf: each) includesKey: anId ]
 ]
 
 { #category : 'accessing' }
 RZDiscovery >> openDatabasesOf: aGossipEndpoint [
-	"Which databases that member holds open, or empty while nothing has been heard
-	from it - and empty is also the honest answer for a member that holds none."
+	"Which databases that member holds open and in which role, as id -> role. Empty
+	while nothing has been heard from it - and empty is also the honest answer for a
+	member that holds none.
 
-	| state |
+	An older image publishes a plain list of ids, because the role came later. It is
+	read as ids with no role rather than being refused: during a rollout both are on
+	the air at once, and a reader that breaks on the older form would break on
+	exactly the members that have not been restarted yet."
+
+	| state published |
 	state := gossiper endpoints
 		         endpointStateAt: aGossipEndpoint
-		         ifAbsent: [ ^ #(  ) ].
-	^ (state allStates applicationStates
-		   at: RZNode openDatabasesKey
-		   ifAbsent: [ ^ #(  ) ]) value
+		         ifAbsent: [ ^ Dictionary new ].
+	published := (state allStates applicationStates
+		              at: RZNode openDatabasesKey
+		              ifAbsent: [ ^ Dictionary new ]) value.
+	published isDictionary ifTrue: [ ^ published ].
+	^ (published collect: [ :each | each -> nil ]) asDictionary
+]
+
+{ #category : 'accessing' }
+RZDiscovery >> roleOf: anId on: aGossipEndpoint [
+	"The role that member says it is playing for that database, or nil when it does
+	not hold it open - and also nil when it holds it but published no role, which is
+	what an image from before the role looks like.
+
+	Read against RZRendezvousHashingStrategy>>hostNamesForKey: this is the
+	interesting answer: a member acting as primary for a database it is only ranked
+	second for has taken over, and that is not something any rank can tell you."
+
+	^ (self openDatabasesOf: aGossipEndpoint) at: anId ifAbsent: [ nil ]
 ]
 
 { #category : 'accessing' }

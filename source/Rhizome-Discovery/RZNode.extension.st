@@ -19,38 +19,46 @@ RZNode >> announceServices [
 ]
 
 { #category : '*Rhizome-Discovery' }
-RZNode >> hasOpenDatabases: aCollectionOfIds [
-	"Say which databases this image currently holds open - all of them, every time,
-	not what changed.
+RZNode >> hasOpenDatabases: aDictionaryOfIdsAndRoles [
+	"Say which databases this image currently holds open and in which role - all of
+	them, every time, not what changed.
+
+	The role is the one actually being played, not the rank this node would have for
+	that id. The rank is a function of the id and the membership and every reader
+	works it out for itself (RZRendezvousHashingStrategy>>hostNamesForKey: answers
+	the three in order); publishing it again would say nothing. What cannot be worked
+	out is that a node is acting as primary for something it is only ranked second
+	for - and after a failover that is exactly what has happened.
+
+	One key holding a map rather than one key per role. A promotion is then a single
+	value with a single version: the entry changes its role and no reader ever sees
+	the database in two roles or in none. Across keys gossip promises nothing, so
+	three lists would have a window in which exactly the state one is looking for -
+	two primaries - is indistinguishable from the moment of a correct handover.
 
 	State, not events, which is what gossip is for: a member that misses a round
 	misses nothing, because the next one carries the whole answer again. It also
 	means the cost is bounded by how often a round happens, not by how often a
 	database opens - a busy image that opens and closes a hundred times between two
-	rounds sends one list.
+	rounds sends one map.
 
-	Not a GossipListValue, although one exists and #addToList:item: would take it.
-	A list value earns its tombstones where several writers add to one set; here
-	there is exactly one writer, its own image, and the value is replaced whole on
-	the far side. The tombstones would be bytes that buy nothing - and this is a set
-	that turns over, so there would be many of them.
-
-	*What it costs*, measured on 2026-09-25: about 27 bytes per database and member,
+	*What it costs*, measured on 2026-09-25: about 37 bytes per database and member,
 	on top of 62 for the key itself. An ACK with the full delta of 11 members, each
-	holding two databases open, is 4270 B against 3005 B without. The ceiling is the
-	datagram: 65507 B works out to roughly 200 open databases per image at 11
+	holding two databases open, is 4468 B against 3005 B without. The ceiling is the
+	datagram: 65507 B works out to roughly 150 open databases per image at 11
 	members. Nobody is near that - alpha runs at two - but whoever raises it should
 	know where it ends."
 
-	| ids |
-	ids := aCollectionOfIds asArray.
 	"Saying the same thing again is not saying anything, and it is worth one
 	comparison to keep it that way: the caller is the registry's hot path, it answers
 	for every request, and mostly nothing has changed. A state whose version moves
 	for nothing lands in every partial delta for nothing."
-	self openDatabases = ids ifTrue: [ ^ self ].
-	self openDatabases: ids.
-	gossiper stateAt: self class openDatabasesKey put: ids
+
+	self openDatabases = aDictionaryOfIdsAndRoles ifTrue: [ ^ self ].
+	self openDatabases: aDictionaryOfIdsAndRoles.
+	gossiper
+		stateAt: self class openDatabasesKey
+		put: aDictionaryOfIdsAndRoles
 ]
 
 { #category : '*Rhizome-Discovery' }
