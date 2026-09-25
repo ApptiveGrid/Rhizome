@@ -1,5 +1,5 @@
 "
-Covers what RZDiscovery answers about membership, and about which services each member says it offers and where.
+Covers what RZDiscovery answers about membership, about which services each member says it offers and where, and about which databases each member holds open.
 
 No sockets: endpoints are put into the gossiper by hand, exactly as an arriving delta would leave them. What is checked is the answer, not that it travelled.
 "
@@ -23,6 +23,17 @@ RZDiscoveryTest >> member: anEndpoint offers: aServiceName [
 	(gossiper endpoints newEndpointStateFor: anEndpoint)
 		applicationStateAt: (RZNode serviceKeyFor: aServiceName)
 		put: '10.10.0.1:3601'.
+	^ anEndpoint
+]
+
+{ #category : 'running' }
+RZDiscoveryTest >> member: anEndpoint hasOpen: aCollectionOfIds [
+
+	(gossiper endpoints
+		 endpointStateAt: anEndpoint
+		 ifAbsent: [ gossiper endpoints newEndpointStateFor: anEndpoint ])
+		applicationStateAt: RZNode openDatabasesKey
+		put: aCollectionOfIds asArray.
 	^ anEndpoint
 ]
 
@@ -121,4 +132,54 @@ RZDiscoveryTest >> testTheEndpointOfAServiceIsWhereItSaidItIs [
 	self
 		assert: (discovery endpointOfService: 'apptive-metabase' on: other)
 		equals: '10.10.0.1:3601'
+]
+
+{ #category : 'tests' }
+RZDiscoveryTest >> testAMemberThatSaidNothingHasNothingOpen [
+	"Heard from, and silent about databases. Empty, not nil - a member that holds
+	none says exactly the same thing, and neither is an error."
+
+	| other |
+	other := self otherOn: 9002.
+	gossiper endpoints newEndpointStateFor: other.
+	self assertEmpty: (discovery openDatabasesOf: other)
+]
+
+{ #category : 'tests' }
+RZDiscoveryTest >> testAnUnknownMemberHasNothingOpen [
+
+	self assertEmpty: (discovery openDatabasesOf: (self otherOn: 9009))
+]
+
+{ #category : 'tests' }
+RZDiscoveryTest >> testNobodyHoldsADatabaseThatIsNotOpenAnywhere [
+
+	self member: (self otherOn: 9002) hasOpen: #( 'aaa' ).
+	self assertEmpty: (discovery membersWithDatabaseOpen: 'zzz')
+]
+
+{ #category : 'tests' }
+RZDiscoveryTest >> testTheDatabasesOfAMemberAreWhatItSaid [
+
+	| other |
+	other := self member: (self otherOn: 9002) hasOpen: #( 'aaa' 'bbb' ).
+	self
+		assert: (discovery openDatabasesOf: other) asArray
+		equals: #( 'aaa' 'bbb' )
+]
+
+{ #category : 'tests' }
+RZDiscoveryTest >> testTwoMembersCanHoldTheSameDatabaseOpen [
+	"Which is a real state and not a fault: a replica is open on more than one image
+	by design. Who may write to it is the ownership record's answer, not this one -
+	see RZDiscovery>>membersWithDatabaseOpen:."
+
+	self member: (self otherOn: 9002) hasOpen: #( 'aaa' 'bbb' ).
+	self member: (self otherOn: 9003) hasOpen: #( 'bbb' ).
+	self
+		assert: (discovery membersWithDatabaseOpen: 'bbb') size
+		equals: 2.
+	self
+		assert: (discovery membersWithDatabaseOpen: 'aaa') size
+		equals: 1
 ]
