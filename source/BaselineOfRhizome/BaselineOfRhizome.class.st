@@ -103,7 +103,7 @@ BaselineOfRhizome >> soil: spec [
 
 	spec baseline: 'Soil' with: [ 
 		spec 
-			repository: 'github://ApptiveGrid/Soil:e1a7f94274639d56e0961111bd0f4667881a12c4/src' ]
+			repository: 'github://ApptiveGrid/Soil:29d996108a928eaaffb11a8564b930e00c5ce50a/src' ]
 ]
 
 { #category : 'baselines' }
