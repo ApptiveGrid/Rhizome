@@ -200,12 +200,18 @@ RZDiscoverySimulationTest >> testLastSeenStandsStillWhileAMemberIsCutOffAndMoves
 
 	The two readings during the partition are taken from inside the run; without
 	them the test would only show the happy end and would stay green even if the
-	timestamp had never stood still."
+	timestamp had never stood still.
+
+	Both of them are taken well after the cut, and that is not slack. Since a relayed
+	heartbeat keeps counting (Gossip, 2026-09-25), a third party can still deliver a
+	heartbeat this image had not caught up on, so the timestamp may move once more
+	after the member has gone quiet. Reading at 200 caught that moment roughly one
+	run in two hundred. What stands still is the steady state, not the first instant."
 	| whileCutOff stillCutOff |
 	self at: 150 do: [
 		router simulateNetworkPartition: '9002' and: '9001'.
 		router simulateNetworkPartition: '9002' and: '9003' ].
-	self at: 200 do: [ whileCutOff := self lastSeenAt: #node1 of: #node2 ].
+	self at: 240 do: [ whileCutOff := self lastSeenAt: #node1 of: #node2 ].
 	self at: 290 do: [ stillCutOff := self lastSeenAt: #node1 of: #node2 ].
 	self at: 300 do: [
 		router healPartition: '9002' and: '9001'.

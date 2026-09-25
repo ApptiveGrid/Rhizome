@@ -106,7 +106,18 @@ RZDiscovery >> lastSeen: aGossipEndpoint [
 	did not: a copy's version stood still, so a third party's heartbeat was relayed
 	once, on first contact, and for a member this image did not talk to directly the
 	timestamp stopped there. That limit was measured on 2026-09-22 and found again
-	by the observer on 2026-09-25, which talks to one node only."
+	by the observer on 2026-09-25, which talks to one node only.
+
+	So liveness travels, and the timestamp says 'somebody in this cluster heard from
+	it, and I have been told' rather than 'I heard from it'.
+
+	*What follows for a failure detector,* and it is the difference between two
+	questions: 'can I reach it' is not answered here and never was. While a member
+	is cut off from this image alone, its timestamp keeps moving, because the others
+	still hear it - which is right, and is why a detector must not read this as
+	reachability. And while a member is cut off from everyone, the timestamp may
+	still move once more, when a third party delivers a heartbeat this image had not
+	caught up on yet; after that it stands still."
 	^ (gossiper endpoints endpointStateAt: aGossipEndpoint ifAbsent: [ ^ nil ]) lastSeen
 ]
 
