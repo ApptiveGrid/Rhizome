@@ -80,7 +80,7 @@ RZNode >> targetNodeFor: aString [
 
 { #category : 'accessing' }
 RZNode >> type [
-	"What kind of node this is: #base, #account, #metabase or #lurker.
+	"What kind of node this is: #base, #account or #metabase.
 	Discovery publishes it; see RZNode class>>knownTypes."
 	^ type
 ]
