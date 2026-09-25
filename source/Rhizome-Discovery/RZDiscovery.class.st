@@ -102,12 +102,26 @@ RZDiscovery >> lastSeen: aGossipEndpoint [
 	that stays with the lease manager until there is a failure detector of its own
 	(Entscheidung 4, Rhizome decisions of 2026-09-22).
 
-	One limit of the layer below, measured on 2026-09-22: a heartbeat only ever
-	arrives from the member itself. Gossip relays what it knows about a third
-	party once, on first contact, and never again, so for a member this image does
-	not talk to directly the timestamp stops at the moment it was first heard of.
-	With every image seeding every other - the deployment that is planned - all
-	members are talked to directly and the question does not arise."
+	Liveness travels, and that is what this answers. A heartbeat need not arrive
+	from the member itself: a neighbour that hears it passes it on, so this image
+	can learn that a member is alive without ever speaking to it. The timestamp
+	therefore says 'somebody in this cluster heard from it, and I have been told',
+	not 'I heard from it'.
+
+	It did not use to. Until 2026-09-25 a relayed heartbeat arrived exactly once, at
+	first contact, and the timestamp of a member this image did not talk to directly
+	stopped there - the limit was measured on 2026-09-22 and noted here. The cause
+	was in Gossip: a copy of somebody else's state did not carry its version
+	forward, so two images comparing digests about a third agreed there was nothing
+	to send. Fixed in GossipEndpointStateDelta>>applyChangesTo:.
+
+	*What follows for a failure detector,* and it is the difference between two
+	questions: 'can I reach it' is not answered here and never was. While a member
+	is cut off from this image alone, its timestamp keeps moving, because the others
+	still hear it - which is right, and is why a detector must not read this as
+	reachability. And while a member is cut off from everyone, the timestamp may
+	still move once more, when a third party delivers a heartbeat this image had not
+	caught up on yet; after that it stands still."
 	^ (gossiper endpoints endpointStateAt: aGossipEndpoint ifAbsent: [ ^ nil ]) lastSeen
 ]
 
