@@ -102,12 +102,11 @@ RZDiscovery >> lastSeen: aGossipEndpoint [
 	that stays with the lease manager until there is a failure detector of its own
 	(Entscheidung 4, Rhizome decisions of 2026-09-22).
 
-	One limit of the layer below, measured on 2026-09-22: a heartbeat only ever
-	arrives from the member itself. Gossip relays what it knows about a third
-	party once, on first contact, and never again, so for a member this image does
-	not talk to directly the timestamp stops at the moment it was first heard of.
-	With every image seeding every other - the deployment that is planned - all
-	members are talked to directly and the question does not arise."
+	A heartbeat relayed through a neighbour counts as well. Until Gossip 59eb796 it
+	did not: a copy's version stood still, so a third party's heartbeat was relayed
+	once, on first contact, and for a member this image did not talk to directly the
+	timestamp stopped there. That limit was measured on 2026-09-22 and found again
+	by the observer on 2026-09-25, which talks to one node only."
 	^ (gossiper endpoints endpointStateAt: aGossipEndpoint ifAbsent: [ ^ nil ]) lastSeen
 ]
 
