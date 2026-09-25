@@ -37,10 +37,12 @@ RZNode >> gossiper: aGossiper [
 
 { #category : '*Rhizome-Discovery' }
 RZNode class >> knownTypes [
-	"The four a node can be, per Rhizome decisions of 2026-09-22. Not enforced:
-	a wrong value would be published rather than refused, and nothing resolves
-	on it yet."
-	^ #( #base #account #metabase #lurker )
+	"The three a node can be. Rhizome decisions of 2026-09-22 named a fourth,
+	#lurker, for a laptop taking part without taking on work; since 2026-09-25 that
+	laptop is a GossipObserver, which publishes nothing and so has no type. Not
+	enforced: a wrong value would be published rather than refused, and nothing
+	resolves on it yet."
+	^ #( #base #account #metabase )
 ]
 
 { #category : '*Rhizome-Discovery' }

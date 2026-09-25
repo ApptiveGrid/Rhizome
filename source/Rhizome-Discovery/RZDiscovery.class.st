@@ -121,7 +121,7 @@ RZDiscovery >> size [
 
 { #category : 'accessing' }
 RZDiscovery >> typeOf: aGossipEndpoint [
-	"What that member says it is - #base, #account, #metabase or #lurker - or nil
+	"What that member says it is - #base, #account or #metabase - or nil
 	when nothing has been heard from it, or when it has been heard from but has said
 	nothing about its kind.
 
