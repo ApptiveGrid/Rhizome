@@ -27,7 +27,19 @@ RZDiscoveryTest >> member: anEndpoint offers: aServiceName [
 ]
 
 { #category : 'running' }
-RZDiscoveryTest >> member: anEndpoint hasOpen: aCollectionOfIds [
+RZDiscoveryTest >> member: anEndpoint hasOpen: aDictionaryOfIdsAndRoles [
+
+	(gossiper endpoints
+		 endpointStateAt: anEndpoint
+		 ifAbsent: [ gossiper endpoints newEndpointStateFor: anEndpoint ])
+		applicationStateAt: RZNode openDatabasesKey
+		put: aDictionaryOfIdsAndRoles.
+	^ anEndpoint
+]
+
+{ #category : 'running' }
+RZDiscoveryTest >> member: anEndpoint publishedTheOldList: aCollectionOfIds [
+	"What an image from before the role puts on the air: a plain list."
 
 	(gossiper endpoints
 		 endpointStateAt: anEndpoint
@@ -146,6 +158,19 @@ RZDiscoveryTest >> testAMemberThatSaidNothingHasNothingOpen [
 ]
 
 { #category : 'tests' }
+RZDiscoveryTest >> testAnImageFromBeforeTheRoleIsStillRead [
+	"During a rollout both forms are on the air. The older one is read as ids
+	without a role rather than refused, because a reader that breaks on it breaks on
+	exactly the members that have not been restarted yet."
+
+	| other |
+	other := self member: (self otherOn: 9002) publishedTheOldList: #( 'aaa' ).
+	self assert: (discovery openDatabasesOf: other) keys asArray equals: #( 'aaa' ).
+	self assert: (discovery membersWithDatabaseOpen: 'aaa') size equals: 1.
+	self assert: (discovery roleOf: 'aaa' on: other) isNil
+]
+
+{ #category : 'tests' }
 RZDiscoveryTest >> testAnUnknownMemberHasNothingOpen [
 
 	self assertEmpty: (discovery openDatabasesOf: (self otherOn: 9009))
@@ -154,41 +179,50 @@ RZDiscoveryTest >> testAnUnknownMemberHasNothingOpen [
 { #category : 'tests' }
 RZDiscoveryTest >> testNobodyHoldsADatabaseThatIsNotOpenAnywhere [
 
-	self member: (self otherOn: 9002) hasOpen: #( 'aaa' ).
-	self assertEmpty: (discovery membersWithDatabaseOpen: 'zzz')
+	self
+		member: (self otherOn: 9002)
+		hasOpen: (Dictionary newFrom: { 'aaa' -> #primary }).
+	self assertEmpty: (discovery membersWithDatabaseOpen: 'zzz').
+	self assert: (discovery roleOf: 'zzz' on: (self otherOn: 9002)) isNil
+]
+
+{ #category : 'tests' }
+RZDiscoveryTest >> testSeveralMembersCanHoldOneDatabaseOpen [
+	"In replication mode this is the ordinary case (Norbert, 2026-09-25): a database
+	is open on several images, and full - that is, as primary - on exactly one. The
+	others hold a replica.
+
+	So several answers are not by themselves a finding. Two of them calling
+	themselves primary would be, and that is what the role is for - the count of
+	members does not say it, #roleOf:on: does."
+
+	self
+		member: (self otherOn: 9002)
+		hasOpen: (Dictionary newFrom: { 'bbb' -> #primary }).
+	self
+		member: (self otherOn: 9003)
+		hasOpen: (Dictionary newFrom: { 'bbb' -> #secondary }).
+	self assert: (discovery membersWithDatabaseOpen: 'bbb') size equals: 2.
+	self
+		assert: (discovery roleOf: 'bbb' on: (self otherOn: 9002))
+		equals: #primary.
+	self
+		assert: (discovery roleOf: 'bbb' on: (self otherOn: 9003))
+		equals: #secondary
 ]
 
 { #category : 'tests' }
 RZDiscoveryTest >> testTheDatabasesOfAMemberAreWhatItSaid [
 
 	| other |
-	other := self member: (self otherOn: 9002) hasOpen: #( 'aaa' 'bbb' ).
+	other := self
+		         member: (self otherOn: 9002)
+		         hasOpen: (Dictionary newFrom: {
+					         ('aaa' -> #primary).
+					         ('bbb' -> #secondary) }).
 	self
-		assert: (discovery openDatabasesOf: other) asArray
-		equals: #( 'aaa' 'bbb' )
-]
-
-{ #category : 'tests' }
-RZDiscoveryTest >> testSeveralMembersCanHoldOneDatabaseOpen [
-	"In replication mode this is the ordinary case (Norbert, 2026-09-25): a database
-	is open on several images, and **full - that is, as primary - on exactly one**.
-	The others hold a replica.
-
-	So several answers here are not by themselves a finding. What must be unique is
-	the primary, and this answer does not say who that is: the ownership record does,
-	and stays the only authority on it. Reading a role out of this list would put a
-	second claim beside it, which is what the design avoids.
-
-	Worth knowing while reading it today: replication is not deployed, so in
-	production one open per database is what one would expect - by deployment, not
-	by design."
-
-	self member: (self otherOn: 9002) hasOpen: #( 'aaa' 'bbb' ).
-	self member: (self otherOn: 9003) hasOpen: #( 'bbb' ).
-	self
-		assert: (discovery membersWithDatabaseOpen: 'bbb') size
-		equals: 2.
-	self
-		assert: (discovery membersWithDatabaseOpen: 'aaa') size
-		equals: 1
+		assert: (discovery openDatabasesOf: other)
+		equals: (Dictionary newFrom: {
+					 ('aaa' -> #primary).
+					 ('bbb' -> #secondary) })
 ]

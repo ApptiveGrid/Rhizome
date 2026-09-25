@@ -145,20 +145,13 @@ RZNodeDiscoveryTest >> testSayingWhatIsOpenReplacesWhatWasSaidBefore [
 	closed is simply not in it any more. Nobody has to send a retraction, and a
 	member that missed a round has missed nothing."
 
-	node hasOpenDatabases: #( 'aaa' 'bbb' ).
-	node hasOpenDatabases: #( 'bbb' ).
+	node hasOpenDatabases: (Dictionary newFrom: {
+			 ('aaa' -> #primary).
+			 ('bbb' -> #primary) }).
+	node hasOpenDatabases: (Dictionary newFrom: { 'bbb' -> #primary }).
 	self
-		assert: (gossiper stateAt: RZNode openDatabasesKey) asArray
+		assert: (gossiper stateAt: RZNode openDatabasesKey) keys asArray
 		equals: #( 'bbb' )
-]
-
-{ #category : 'tests' }
-RZNodeDiscoveryTest >> testSaysWhichDatabasesItHasOpen [
-
-	node hasOpenDatabases: #( 'aaa' 'bbb' ).
-	self
-		assert: (gossiper stateAt: RZNode openDatabasesKey) asArray
-		equals: #( 'aaa' 'bbb' )
 ]
 
 { #category : 'tests' }
@@ -167,10 +160,10 @@ RZNodeDiscoveryTest >> testTheDiscoveryReadsItBack [
 	this member."
 
 	node announceServices.
-	node hasOpenDatabases: #( 'aaa' ).
+	node hasOpenDatabases: (Dictionary newFrom: { 'aaa' -> #primary }).
 	self
-		assert: (node discovery openDatabasesOf: node gossipEndpoint) asArray
-		equals: #( 'aaa' ).
+		assert: (node discovery openDatabasesOf: node gossipEndpoint)
+		equals: (Dictionary newFrom: { 'aaa' -> #primary }).
 	self
 		assert: (node discovery membersWithDatabaseOpen: 'aaa') asArray
 		equals: (Array with: node gossipEndpoint)
@@ -181,9 +174,29 @@ RZNodeDiscoveryTest >> testWithNothingOpenItSaysSo [
 	"An empty answer is an answer. It has to be published rather than left out, or
 	an image that closed its last database would keep looking as it did before."
 
-	node hasOpenDatabases: #( 'aaa' ).
-	node hasOpenDatabases: #(  ).
+	node hasOpenDatabases: (Dictionary newFrom: { 'aaa' -> #primary }).
+	node hasOpenDatabases: Dictionary new.
 	self assertEmpty: (gossiper stateAt: RZNode openDatabasesKey)
+]
+{ #category : 'tests' }
+RZNodeDiscoveryTest >> testAPromotionIsOneChange [
+	"Why one key with a map and not one key per role: the entry changes its role in
+	a single value with a single version. Across three keys gossip promises nothing,
+	so there would be a window in which the database is in two roles or in none -
+	and two primaries is exactly the state one reads this to find."
+
+	| version |
+	node hasOpenDatabases: (Dictionary newFrom: { 'aaa' -> #secondary }).
+	version := (gossiper localEndpointState applicationStateAt:
+		            RZNode openDatabasesKey) version.
+	node hasOpenDatabases: (Dictionary newFrom: { 'aaa' -> #primary }).
+	self
+		assert: (gossiper localEndpointState applicationStateAt:
+				 RZNode openDatabasesKey) version
+		equals: version + 1.
+	self
+		assert: (node discovery roleOf: 'aaa' on: node gossipEndpoint)
+		equals: #primary
 ]
 
 { #category : 'tests' }
@@ -193,12 +206,26 @@ RZNodeDiscoveryTest >> testSayingTheSameThingTwiceMovesNothing [
 	so the second call has to be silent."
 
 	| version |
-	node hasOpenDatabases: #( 'aaa' ).
+	node hasOpenDatabases: (Dictionary newFrom: { 'aaa' -> #primary }).
 	version := (gossiper localEndpointState applicationStateAt:
 		            RZNode openDatabasesKey) version.
-	node hasOpenDatabases: #( 'aaa' ).
+	node hasOpenDatabases: (Dictionary newFrom: { 'aaa' -> #primary }).
 	self
 		assert: (gossiper localEndpointState applicationStateAt:
 				 RZNode openDatabasesKey) version
 		equals: version
 ]
+
+{ #category : 'tests' }
+RZNodeDiscoveryTest >> testSaysWhichDatabasesItHasOpenAndAsWhat [
+
+	node hasOpenDatabases: (Dictionary newFrom: {
+			 ('aaa' -> #primary).
+			 ('bbb' -> #secondary) }).
+	self
+		assert: (gossiper stateAt: RZNode openDatabasesKey)
+		equals: (Dictionary newFrom: {
+					 ('aaa' -> #primary).
+					 ('bbb' -> #secondary) })
+]
+

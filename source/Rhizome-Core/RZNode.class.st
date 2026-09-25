@@ -57,16 +57,16 @@ RZNode >> isLocalNode [
 
 { #category : 'accessing' }
 RZNode >> openDatabases [
-	"Which databases this node holds open, as it last said. Kept here for the same
-	reason #services is: what a node is and does belongs to the node, and what
-	gossip makes of it belongs to the discovery."
+	"Which databases this node holds open and in which role, as it last said, as
+	id -> role. Kept here for the same reason #services is: what a node is and does
+	belongs to the node, and what gossip makes of it belongs to the discovery."
 
-	^ openDatabases ifNil: [ openDatabases := #(  ) ]
+	^ openDatabases ifNil: [ openDatabases := Dictionary new ]
 ]
 
 { #category : 'accessing' }
-RZNode >> openDatabases: aCollectionOfIds [
-	openDatabases := aCollectionOfIds asArray
+RZNode >> openDatabases: aDictionaryOfIdsAndRoles [
+	openDatabases := aDictionaryOfIdsAndRoles
 ]
 
 { #category : 'accessing' }
