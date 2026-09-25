@@ -5,6 +5,7 @@ Class {
 		'port',
 		'host',
 		'services',
+		'openDatabases',
 		'gossiper'
 	],
 	#category : 'Rhizome-Core-Objects',
@@ -52,6 +53,20 @@ RZNode >> isLocalHost [
 { #category : 'testing' }
 RZNode >> isLocalNode [
 	self subclassResponsibility 
+]
+
+{ #category : 'accessing' }
+RZNode >> openDatabases [
+	"Which databases this node holds open, as it last said. Kept here for the same
+	reason #services is: what a node is and does belongs to the node, and what
+	gossip makes of it belongs to the discovery."
+
+	^ openDatabases ifNil: [ openDatabases := #(  ) ]
+]
+
+{ #category : 'accessing' }
+RZNode >> openDatabases: aCollectionOfIds [
+	openDatabases := aCollectionOfIds asArray
 ]
 
 { #category : 'accessing' }

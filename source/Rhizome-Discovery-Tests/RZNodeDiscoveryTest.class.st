@@ -138,3 +138,67 @@ RZNodeDiscoveryTest >> testTakesItsSeedsFromConfiguration [
 	self assert: node seeds size equals: 2.
 	self assert: node gossiper seedNodes equals: node seeds
 ]
+
+{ #category : 'tests' }
+RZNodeDiscoveryTest >> testSayingWhatIsOpenReplacesWhatWasSaidBefore [
+	"State and not events: every call publishes the whole answer, so a database that
+	closed is simply not in it any more. Nobody has to send a retraction, and a
+	member that missed a round has missed nothing."
+
+	node hasOpenDatabases: #( 'aaa' 'bbb' ).
+	node hasOpenDatabases: #( 'bbb' ).
+	self
+		assert: (gossiper stateAt: RZNode openDatabasesKey) asArray
+		equals: #( 'bbb' )
+]
+
+{ #category : 'tests' }
+RZNodeDiscoveryTest >> testSaysWhichDatabasesItHasOpen [
+
+	node hasOpenDatabases: #( 'aaa' 'bbb' ).
+	self
+		assert: (gossiper stateAt: RZNode openDatabasesKey) asArray
+		equals: #( 'aaa' 'bbb' )
+]
+
+{ #category : 'tests' }
+RZNodeDiscoveryTest >> testTheDiscoveryReadsItBack [
+	"The two halves meet: what the node published is what the discovery answers for
+	this member."
+
+	node announceServices.
+	node hasOpenDatabases: #( 'aaa' ).
+	self
+		assert: (node discovery openDatabasesOf: node gossipEndpoint) asArray
+		equals: #( 'aaa' ).
+	self
+		assert: (node discovery membersWithDatabaseOpen: 'aaa') asArray
+		equals: (Array with: node gossipEndpoint)
+]
+
+{ #category : 'tests' }
+RZNodeDiscoveryTest >> testWithNothingOpenItSaysSo [
+	"An empty answer is an answer. It has to be published rather than left out, or
+	an image that closed its last database would keep looking as it did before."
+
+	node hasOpenDatabases: #( 'aaa' ).
+	node hasOpenDatabases: #(  ).
+	self assertEmpty: (gossiper stateAt: RZNode openDatabasesKey)
+]
+
+{ #category : 'tests' }
+RZNodeDiscoveryTest >> testSayingTheSameThingTwiceMovesNothing [
+	"The registry asks on every request and mostly nothing has changed. A version
+	that moves for nothing would put this key into every partial delta for nothing,
+	so the second call has to be silent."
+
+	| version |
+	node hasOpenDatabases: #( 'aaa' ).
+	version := (gossiper localEndpointState applicationStateAt:
+		            RZNode openDatabasesKey) version.
+	node hasOpenDatabases: #( 'aaa' ).
+	self
+		assert: (gossiper localEndpointState applicationStateAt:
+				 RZNode openDatabasesKey) version
+		equals: version
+]

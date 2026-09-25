@@ -78,6 +78,33 @@ RZDiscovery >> endpointOfService: aServiceName on: aGossipEndpoint [
 ]
 
 { #category : 'accessing' }
+RZDiscovery >> membersWithDatabaseOpen: anId [
+	"Every member that says it holds that database open, the local one included.
+
+	A hint, and deliberately not more. Where a database *belongs* is not answered
+	here - rendezvous hashing gives the candidates and the ownership record gives
+	the truth, and that stays the only authority. What this answers is who has it
+	open at the moment, which is a different question and an operational one."
+
+	^ self members select: [ :each |
+		  (self openDatabasesOf: each) includes: anId ]
+]
+
+{ #category : 'accessing' }
+RZDiscovery >> openDatabasesOf: aGossipEndpoint [
+	"Which databases that member holds open, or empty while nothing has been heard
+	from it - and empty is also the honest answer for a member that holds none."
+
+	| state |
+	state := gossiper endpoints
+		         endpointStateAt: aGossipEndpoint
+		         ifAbsent: [ ^ #(  ) ].
+	^ (state allStates applicationStates
+		   at: RZNode openDatabasesKey
+		   ifAbsent: [ ^ #(  ) ]) value
+]
+
+{ #category : 'accessing' }
 RZDiscovery >> gossiper [
 	^ gossiper
 ]
