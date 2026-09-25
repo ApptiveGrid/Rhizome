@@ -102,18 +102,14 @@ RZDiscovery >> lastSeen: aGossipEndpoint [
 	that stays with the lease manager until there is a failure detector of its own
 	(Entscheidung 4, Rhizome decisions of 2026-09-22).
 
-	Liveness travels, and that is what this answers. A heartbeat need not arrive
-	from the member itself: a neighbour that hears it passes it on, so this image
-	can learn that a member is alive without ever speaking to it. The timestamp
-	therefore says 'somebody in this cluster heard from it, and I have been told',
-	not 'I heard from it'.
+	A heartbeat relayed through a neighbour counts as well. Until Gossip 59eb796 it
+	did not: a copy's version stood still, so a third party's heartbeat was relayed
+	once, on first contact, and for a member this image did not talk to directly the
+	timestamp stopped there. That limit was measured on 2026-09-22 and found again
+	by the observer on 2026-09-25, which talks to one node only.
 
-	It did not use to. Until 2026-09-25 a relayed heartbeat arrived exactly once, at
-	first contact, and the timestamp of a member this image did not talk to directly
-	stopped there - the limit was measured on 2026-09-22 and noted here. The cause
-	was in Gossip: a copy of somebody else's state did not carry its version
-	forward, so two images comparing digests about a third agreed there was nothing
-	to send. Fixed in GossipEndpointStateDelta>>applyChangesTo:.
+	So liveness travels, and the timestamp says 'somebody in this cluster heard from
+	it, and I have been told' rather than 'I heard from it'.
 
 	*What follows for a failure detector,* and it is the difference between two
 	questions: 'can I reach it' is not answered here and never was. While a member
