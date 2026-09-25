@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'port',
 		'host',
-		'type',
+		'services',
 		'gossiper'
 	],
 	#category : 'Rhizome-Core-Objects',
@@ -79,13 +79,21 @@ RZNode >> targetNodeFor: aString [
 ]
 
 { #category : 'accessing' }
-RZNode >> type [
-	"What kind of node this is: #base, #account or #metabase.
-	Discovery publishes it; see RZNode class>>knownTypes."
-	^ type
+RZNode >> offers: aServiceName at: anEndpoint [
+	"This node serves that, and it is reachable there. One endpoint per service, so
+	two services of one node may share an address or not - whether they do is a
+	question for the deployment and not for the protocol.
+
+	The name is the name the rest of the system already uses for a component -
+	'apptive-base', 'apptive-account' - plus what Rhizome serves itself."
+
+	self services at: aServiceName put: anEndpoint
 ]
 
 { #category : 'accessing' }
-RZNode >> type: aSymbol [
-	type := aSymbol
+RZNode >> services [
+	"What this node offers, as name -> endpoint. Empty is a real answer: a node that
+	serves nothing still takes part, hears everybody and is heard."
+
+	^ services ifNil: [ services := Dictionary new ]
 ]

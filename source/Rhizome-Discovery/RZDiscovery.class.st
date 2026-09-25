@@ -16,6 +16,17 @@ Class {
 }
 
 { #category : 'instance creation' }
+RZDiscovery class >> hostAndPortFrom: aString [
+	"A published service endpoint, split the way a caller needs it: 'host' -> port.
+	The same shape #seedFrom: parses, and for the same reason - a deployment writes
+	an address and a port on one line, and exactly one place here knows that."
+
+	| parts |
+	parts := $: split: aString trimBoth.
+	^ parts first trimBoth -> parts second trimBoth asInteger
+]
+
+{ #category : 'instance creation' }
 RZDiscovery class >> on: aGossiper [
 	^ self new
 		gossiper: aGossiper;
@@ -52,6 +63,18 @@ RZDiscovery class >> seedsFrom: aString [
 	^ (($, split: aString) collect: [ :each | each trimBoth ])
 		  reject: [ :each | each isEmpty ]
 		  thenCollect: [ :each | self seedFrom: each ]
+]
+
+{ #category : 'accessing' }
+RZDiscovery >> endpointOfService: aServiceName on: aGossipEndpoint [
+	"Where that member serves that service - 'address:port' as it published it - or
+	nil when it does not, or when nothing has been heard from it at all.
+
+	This is not the gossip endpoint and must not be confused with it. What gossip
+	publishes is where gossip is reachable; where a service answers is a value like
+	any other, and the two coincide only if a deployment makes them."
+
+	^ (self servicesOf: aGossipEndpoint) at: aServiceName ifAbsent: [ nil ]
 ]
 
 { #category : 'accessing' }
@@ -100,9 +123,9 @@ RZDiscovery >> members [
 ]
 
 { #category : 'accessing' }
-RZDiscovery >> membersOfType: aSymbol [
-	"Every member that says it is of this kind, the local one included. Empty while
-	nothing of the kind has been heard of - an answer a caller has to be able to live
+RZDiscovery >> membersOffering: aServiceName [
+	"Every member that says it serves that, the local one included. Empty while
+	nothing offering it has been heard of - an answer a caller has to be able to live
 	with, because it is also the answer during the first seconds of an image's life.
 
 	Says nothing about liveness, like everything here: a member listed has been heard
@@ -111,26 +134,31 @@ RZDiscovery >> membersOfType: aSymbol [
 	The order is whatever the endpoint table happens to hand out. Choosing among
 	several is the caller's business, and no answer here is a load balancer."
 
-	^ self members select: [ :each | (self typeOf: each) = aSymbol ]
+	^ self members select: [ :each |
+		  (self endpointOfService: aServiceName on: each) notNil ]
+]
+
+{ #category : 'accessing' }
+RZDiscovery >> servicesOf: aGossipEndpoint [
+	"What that member says it offers, as name -> endpoint. Empty when nothing has
+	been heard from it, and empty when it serves nothing - a node may take part and
+	offer none.
+
+	Read by the namespace rather than by a fixed set of keys: which services exist is
+	not something this has to know, and a name nobody here recognises still arrives."
+
+	| state services |
+	services := Dictionary new.
+	state := gossiper endpoints
+		         endpointStateAt: aGossipEndpoint
+		         ifAbsent: [ ^ services ].
+	state allStates applicationStates keysAndValuesDo: [ :key :each |
+		(RZNode isServiceKey: key) ifTrue: [
+			services at: (RZNode serviceNameFrom: key) put: each value ] ].
+	^ services
 ]
 
 { #category : 'accessing' }
 RZDiscovery >> size [
 	^ self members size
-]
-
-{ #category : 'accessing' }
-RZDiscovery >> typeOf: aGossipEndpoint [
-	"What that member says it is - #base, #account or #metabase - or nil
-	when nothing has been heard from it, or when it has been heard from but has said
-	nothing about its kind.
-
-	Not checked against RZNode class>>knownTypes: a wrong value travels rather than
-	being refused, and answering nil for it would hide it."
-
-	| state |
-	state := gossiper endpoints endpointStateAt: aGossipEndpoint ifAbsent: [ ^ nil ].
-	^ [ (state applicationStateAt: RZNode typeKey) value ]
-		  on: KeyNotFound
-		  do: [ nil ]
 ]

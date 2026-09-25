@@ -42,7 +42,7 @@ RZDiscoverySimulationTest >> addNodeNamed: aSymbol port: anInteger gossipPort: g
 	host := RZLocalHost name: aSymbol address: '127.0.0.1'.
 	node := RZLocalNode port: anInteger.
 	host addNode: node.
-	node type: aType.
+	node offers: aType at: '10.10.0.' , anInteger printString , ':' , anInteger printString.
 	gossiper := DevsGossiper new
 		port: gossipPort;
 		devsServer: server;
@@ -52,7 +52,7 @@ RZDiscoverySimulationTest >> addNodeNamed: aSymbol port: anInteger gossipPort: g
 	node gossiper: gossiper.
 	"A node says what it is as it comes up; a gossiper knows nobody, not even
 	itself, until it first touches its own state, and announcing does that."
-	node announceType.
+	node announceServices.
 	server onIncomingDo: [ :message :srv |
 		gossiper
 			received: message payload
@@ -165,24 +165,22 @@ RZDiscoverySimulationTest >> testANodeIsReachedThroughAThirdOne [
 	pass on what it has already learned."
 	router simulateNetworkPartition: '9001' and: '9002'.
 	self runSimulationFor: 400.
-	self
-		assert: ((self node: #node1) typeOfMember: (self node: #node2) gossipEndpoint)
-		equals: #account.
-	self
-		assert: ((self node: #node2) typeOfMember: (self node: #node1) gossipEndpoint)
-		equals: #base
+	self assert: ((self node: #node1) servicesOfMember:
+			 (self node: #node2) gossipEndpoint) keys asArray equals: #( 'account' ).
+	self assert: ((self node: #node2) servicesOfMember:
+			 (self node: #node1) gossipEndpoint) keys asArray equals: #( 'base' )
 ]
 
 { #category : 'tests' }
-RZDiscoverySimulationTest >> testEveryNodeLearnsTheTypeOfEveryOther [
+RZDiscoverySimulationTest >> testEveryNodeLearnsTheServicesOfEveryOther [
 	"The point of stage one, now with the messages actually travelling: what a
 	node says about itself arrives at the others unchanged."
 	self runSimulationFor: 200.
 	nodes valuesDo: [ :each |
 		nodes valuesDo: [ :other |
 			self
-				assert: (each typeOfMember: other gossipEndpoint)
-				equals: other type ] ]
+				assert: (each servicesOfMember: other gossipEndpoint)
+				equals: other services ] ]
 ]
 
 { #category : 'tests' }
@@ -228,15 +226,16 @@ RZDiscoverySimulationTest >> testTypesConvergeAfterAPartitionHeals [
 	router simulateNetworkPartition: '9002' and: '9001'.
 	router simulateNetworkPartition: '9002' and: '9003'.
 	self at: 150 do: [
-		duringThePartition := (self node: #node1) typeOfMember: (self node: #node2) gossipEndpoint ].
+		duringThePartition := (self node: #node1) servicesOfMember:
+			                      (self node: #node2) gossipEndpoint ].
 	self at: 200 do: [
 		router healPartition: '9002' and: '9001'.
 		router healPartition: '9002' and: '9003' ].
 	self runSimulationFor: 400.
-	self assert: duringThePartition isNil.
+	self assertEmpty: duringThePartition.
 	nodes valuesDo: [ :each |
 		nodes valuesDo: [ :other |
 			self
-				assert: (each typeOfMember: other gossipEndpoint)
-				equals: other type ] ]
+				assert: (each servicesOfMember: other gossipEndpoint)
+				equals: other services ] ]
 ]
