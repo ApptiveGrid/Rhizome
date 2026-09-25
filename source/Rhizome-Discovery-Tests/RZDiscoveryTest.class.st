@@ -169,15 +169,19 @@ RZDiscoveryTest >> testTheDatabasesOfAMemberAreWhatItSaid [
 ]
 
 { #category : 'tests' }
-RZDiscoveryTest >> testTwoMembersOnOneDatabaseIsAnswerable [
-	"Two images holding one database open is **not** a normal state (Norbert,
-	2026-09-25) - a database has one writer and the lock is exclusive. The answer
-	has to be able to name both anyway, because that is the case worth seeing: a
-	stale lock, an image that did not let go, two that believe they are primary.
+RZDiscoveryTest >> testSeveralMembersCanHoldOneDatabaseOpen [
+	"In replication mode this is the ordinary case (Norbert, 2026-09-25): a database
+	is open on several images, and **full - that is, as primary - on exactly one**.
+	The others hold a replica.
 
-	So this is not a feature of the model being exercised, it is an anomaly being
-	made visible. Whoever reads this answer and finds two should treat it as a
-	finding, not as a load-balancing opportunity."
+	So several answers here are not by themselves a finding. What must be unique is
+	the primary, and this answer does not say who that is: the ownership record does,
+	and stays the only authority on it. Reading a role out of this list would put a
+	second claim beside it, which is what the design avoids.
+
+	Worth knowing while reading it today: replication is not deployed, so in
+	production one open per database is what one would expect - by deployment, not
+	by design."
 
 	self member: (self otherOn: 9002) hasOpen: #( 'aaa' 'bbb' ).
 	self member: (self otherOn: 9003) hasOpen: #( 'bbb' ).

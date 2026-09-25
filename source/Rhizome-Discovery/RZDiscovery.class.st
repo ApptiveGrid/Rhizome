@@ -86,11 +86,16 @@ RZDiscovery >> membersWithDatabaseOpen: anId [
 	the truth, and that stays the only authority. What this answers is who has it
 	open at the moment, which is a different question and an operational one.
 
-	*More than one answer is an anomaly.* A database has one writer and the lock is
-	exclusive, so two images holding the same one open is not a state the system is
-	supposed to reach. This says so rather than balancing over them - being able to
-	name both is the point, because a stale lock or an image that did not let go is
-	exactly what one would want to see here."
+	*Several answers are normal, and they do not say who may write.* In replication
+	mode a database is open on several images and full - primary - on exactly one;
+	the others hold a replica. Which one is primary is not in this answer, and
+	deliberately not: the ownership record says it, and a role published beside it
+	would be a second claim about the same thing.
+
+	What this is good for is therefore the other direction: seeing who has it open
+	at all, and noticing an image that never let go. Today, with replication not
+	deployed, more than one answer is already worth looking at - but that is a fact
+	about the deployment, not about the protocol."
 
 	^ self members select: [ :each |
 		  (self openDatabasesOf: each) includes: anId ]
