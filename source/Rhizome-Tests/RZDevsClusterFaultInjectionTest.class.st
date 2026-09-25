@@ -59,6 +59,30 @@ RZDevsClusterFaultInjectionTest >> setUp [
 ]
 
 { #category : 'as yet unclassified' }
+RZDevsClusterFaultInjectionTest >> commitTo: replicaSet times: aNumber [
+	"Move a replica's database version forward, so that one side can be ahead of
+	the other without either being told."
+
+	aNumber timesRepeat: [
+		| txn |
+		txn := replicaSet localReplica soil newTransaction.
+		txn root at: #writes put: replicaSet localReplica databaseVersion.
+		txn commit ]
+]
+
+{ #category : 'as yet unclassified' }
+RZDevsClusterFaultInjectionTest >> rivalClusterForKey: aKey [
+	"Whoever placement puts second for that key - the one that takes over when the
+	first is gone."
+
+	| names name address |
+	names := clusters first placementStrategy hostNamesForKey: aKey.
+	name := names second.
+	address := (self hostList detect: [ :assoc | assoc key = name ]) value.
+	^ self clusterAt: address
+]
+
+{ #category : 'as yet unclassified' }
 RZDevsClusterFaultInjectionTest >> shareOwnershipStoreWithShortLease [
 	"Wire every cluster to one store and one clock. The clock is shared here
 	because these tests are about expiry, not about skew - the seam allows a
@@ -81,6 +105,89 @@ RZDevsClusterFaultInjectionTest >> shareOwnershipStoreWithShortLease [
 RZDevsClusterFaultInjectionTest >> tearDown [
 	super tearDown.
 	'rhizome-devs' asFileReference ensureDeleteAll
+]
+
+{ #category : 'as yet unclassified' }
+RZDevsClusterFaultInjectionTest >> testAOneWayPartitionLeavesThePrimaryFineInItsOwnEyes [
+	"The case a symmetric cut cannot show, and the reason the directed lever exists.
+	Nothing the primary sends arrives; everything sent to it does. From where it
+	stands the cluster is healthy - it renews its lease, because the ownership store
+	is a shared authority and not a peer, and it considers itself writable. Its
+	replication simply stops arriving, silently.
+
+	Nothing here is asserted about detection, because nothing detects it. That is
+	the point of writing the case down before there is a failure detector to show it
+	to."
+
+	| key primary set remote fromTheOtherSide back |
+	self shareOwnershipStoreWithShortLease.
+	key := 'db-7'.
+	primary := self primaryClusterForKey: key.
+	primary hostLeaseManager tryPromoteFor: key.
+	set := primary replicaSetForKey: key.
+	self writeInitialCommitFor: set.
+	remote := set remoteReplicas first.
+	router
+		simulateNetworkPartitionFrom: primary localHost address
+		to: remote address.
+	"A sync round does not raise - it notices the replica is unreachable and goes on."
+	set start.
+	self assert: (primary hostLeaseManager renewFor: key) notNil.
+	self assert: (primary hostLeaseManager isWritableFor: key).
+	"and the other side is not cut off at all"
+	fromTheOtherSide := (self clusterAt: remote address) replicaSetForKey: key.
+	back := fromTheOtherSide remoteReplicas detect: [ :each |
+		        each address = primary localHost address ].
+	self assert: (fromTheOtherSide endpointStatusAt: back) notNil
+]
+
+{ #category : 'as yet unclassified' }
+RZDevsClusterFaultInjectionTest >> testAReturningOldPrimaryIsFencedByWhatItFinds [
+	"The third of the scenarios this epic is measured by, and the one that was
+	missing: crash and partition were played, the return of an old primary was not.
+
+	It runs the whole way through rather than asserting a mechanism: the primary
+	takes the lease and writes; it is cut off and stops renewing, which is what a
+	crash looks like from outside; the rival takes over with a higher epoch and
+	moves the database on; then the old primary comes back, still believing what it
+	believed. What fences it is not a message anyone sends - it is what it finds:
+	the replica it syncs with is ahead, it is no longer primary, so it marks itself
+	stale rather than writing over what happened without it.
+
+	The two halves of that have been tested apart until now - the lease side in this
+	class, the staleness side in RZReplicaSetFencingTest with a cluster built by hand
+	and an ownership record edited in place. Here they meet."
+
+	| key primary rival set rivalSet remote |
+	self shareOwnershipStoreWithShortLease.
+	key := 'db-6'.
+	primary := self primaryClusterForKey: key.
+	rival := self rivalClusterForKey: key.
+	self assert: (primary hostLeaseManager tryPromoteFor: key) notNil.
+	set := primary replicaSetForKey: key.
+	self writeInitialCommitFor: set.
+	router
+		simulateNetworkPartition: primary localHost address
+		and: rival localHost address.
+	"It never renews again - that is the crash, seen from the others."
+	clock advanceBy: 150 milliSeconds.
+	self assert: (rival hostLeaseManager tryPromoteFor: key) epoch > 1.
+	rivalSet := rival replicaSetForKey: key.
+	self writeInitialCommitFor: rivalSet.
+	self commitTo: rivalSet times: 2.
+	self
+		assert: rivalSet localReplica databaseVersion
+		> set localReplica databaseVersion.
+	"and back it comes"
+	router
+		healPartition: primary localHost address
+		and: rival localHost address.
+	remote := set remoteReplicas detect: [ :each |
+		          each address = rival localHost address ].
+	self deny: set localReplica isStale.
+	set syncWith: remote.
+	self assert: set localReplica isStale.
+	self deny: (primary hostLeaseManager isWritableFor: key)
 ]
 
 { #category : 'as yet unclassified' }
