@@ -1,5 +1,5 @@
 "
-Covers what RZDiscovery answers about membership, and about what kind of node each member says it is.
+Covers what RZDiscovery answers about membership, and about which services each member says it offers and where.
 
 No sockets: endpoints are put into the gossiper by hand, exactly as an arriving delta would leave them. What is checked is the answer, not that it travelled.
 "
@@ -15,12 +15,14 @@ Class {
 }
 
 { #category : 'running' }
-RZDiscoveryTest >> member: anEndpoint saysItIs: aSymbol [
-	"An endpoint this image has heard from, having announced its kind - which is
-	what a delta leaves behind."
+RZDiscoveryTest >> member: anEndpoint offers: aServiceName [
+	"An endpoint this image has heard from, having announced a service - which is
+	what a delta leaves behind. The endpoint it serves it at is written as the
+	deployment would write it, and is deliberately not the gossip endpoint."
 
 	(gossiper endpoints newEndpointStateFor: anEndpoint)
-		applicationStateAt: RZNode typeKey put: aSymbol.
+		applicationStateAt: (RZNode serviceKeyFor: aServiceName)
+		put: '10.10.0.1:3601'.
 	^ anEndpoint
 ]
 
@@ -45,7 +47,7 @@ RZDiscoveryTest >> setUp [
 ]
 
 { #category : 'tests' }
-RZDiscoveryTest >> testAMemberThatSaidNothingHasNoType [
+RZDiscoveryTest >> testAMemberThatSaidNothingOffersNothing [
 	"Heard from, but silent about its kind. Different from never heard of, and both
 	answer nil - the distinction that matters is #includesMember:."
 
@@ -53,12 +55,12 @@ RZDiscoveryTest >> testAMemberThatSaidNothingHasNoType [
 	other := self otherOn: 9002.
 	gossiper endpoints newEndpointStateFor: other.
 	self assert: (discovery includesMember: other).
-	self assert: (discovery typeOf: other) isNil
+	self assertEmpty: (discovery servicesOf: other)
 ]
 
 { #category : 'tests' }
-RZDiscoveryTest >> testAnUnknownMemberHasNoType [
-	self assert: (discovery typeOf: (self otherOn: 9999)) isNil
+RZDiscoveryTest >> testAnUnknownMemberOffersNothing [
+	self assertEmpty: (discovery servicesOf: (self otherOn: 9999))
 ]
 
 { #category : 'tests' }
@@ -83,38 +85,40 @@ RZDiscoveryTest >> testMembersAreGossipEndpoints [
 ]
 
 { #category : 'tests' }
-RZDiscoveryTest >> testMembersOfATypeNobodyAnnouncedAreEmpty [
+RZDiscoveryTest >> testAServiceNobodyOffersHasNoMembers [
 	"The answer during the first seconds of an image's life, and the one a caller
 	has to be able to live with - it is why the gossip discovery falls back."
 
-	self member: (self otherOn: 9002) saysItIs: #base.
-	self assertEmpty: (discovery membersOfType: #metabase)
+	self member: (self otherOn: 9002) offers: 'apptive-base'.
+	self assertEmpty: (discovery membersOffering: 'apptive-metabase')
 ]
 
 { #category : 'tests' }
-RZDiscoveryTest >> testMembersOfTypeFindsEveryOneOfThatKind [
+RZDiscoveryTest >> testMembersOfferingFindsEveryOneThatDoes [
 	| base1 base2 |
-	base1 := self member: (self otherOn: 9002) saysItIs: #base.
-	base2 := self member: (self otherOn: 9003) saysItIs: #base.
-	self member: (self otherOn: 9004) saysItIs: #metabase.
+	base1 := self member: (self otherOn: 9002) offers: 'apptive-base'.
+	base2 := self member: (self otherOn: 9003) offers: 'apptive-base'.
+	self member: (self otherOn: 9004) offers: 'apptive-metabase'.
 	self
-		assertCollection: (discovery membersOfType: #base)
+		assertCollection: (discovery membersOffering: 'apptive-base')
 		hasSameElements: { base1. base2 }
 ]
 
 { #category : 'tests' }
-RZDiscoveryTest >> testMembersOfTypeIncludesTheLocalOne [
+RZDiscoveryTest >> testMembersOfferingIncludesTheLocalOne [
 	"An image is a member of its own cluster, and of its own kind. Whether asking
 	for a kind you are yourself is sensible is the caller's question, not this one's."
 
-	gossiper stateAt: RZNode typeKey put: #base.
-	self assert:
-		((discovery membersOfType: #base) includes: discovery localMember)
+	gossiper stateAt: (RZNode serviceKeyFor: 'apptive-base') put: '10.10.0.1:3601'.
+	self assert: ((discovery membersOffering: 'apptive-base') includes:
+			 discovery localMember)
 ]
 
 { #category : 'tests' }
-RZDiscoveryTest >> testTypeOfAMemberThatAnnouncedOne [
+RZDiscoveryTest >> testTheEndpointOfAServiceIsWhereItSaidItIs [
 	| other |
-	other := self member: (self otherOn: 9002) saysItIs: #metabase.
-	self assert: (discovery typeOf: other) equals: #metabase
+	other := self member: (self otherOn: 9002) offers: 'apptive-metabase'.
+	self
+		assert: (discovery endpointOfService: 'apptive-metabase' on: other)
+		equals: '10.10.0.1:3601'
 ]

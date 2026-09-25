@@ -1,10 +1,21 @@
 Extension { #name : 'RZNode' }
 
 { #category : '*Rhizome-Discovery' }
-RZNode >> announceType [
-	"Publish what kind of node this is - and nothing else. The first stage of
-	discovery carries no stage, no version and no capability; see Rhizome decisions."
-	^ gossiper stateAt: self class typeKey put: self type
+RZNode >> announceServices [
+	"Publish what this node serves and where - one gossip state per service, keyed
+	under the service namespace.
+
+	One key per service rather than one list of them, because a GossipApplicationState
+	carries its own version and a partial delta over #applicationStatesAfterVersion:
+	then travels only the service that moved. A list would travel whole, every time.
+
+	The price is that a key cannot be taken back: GossipEndpointState has no
+	counterpart to #applicationStateAt:put:, so a service that stops being offered
+	stands until the image restarts and its new incarnation replaces the state
+	wholesale. While one container is one service, that case does not arise."
+
+	self services keysAndValuesDo: [ :name :endpoint |
+		gossiper stateAt: (self class serviceKeyFor: name) put: endpoint ]
 ]
 
 { #category : '*Rhizome-Discovery' }
@@ -36,16 +47,6 @@ RZNode >> gossiper: aGossiper [
 ]
 
 { #category : '*Rhizome-Discovery' }
-RZNode class >> knownTypes [
-	"The three a node can be. Rhizome decisions of 2026-09-22 named a fourth,
-	#lurker, for a laptop taking part without taking on work; since 2026-09-25 that
-	laptop is a GossipObserver, which publishes nothing and so has no type. Not
-	enforced: a wrong value would be published rather than refused, and nothing
-	resolves on it yet."
-	^ #( #base #account #metabase )
-]
-
-{ #category : '*Rhizome-Discovery' }
 RZNode >> publishedAddress [
 	"The address the others are told about, taken from the host rather than from
 	the machine's own idea of its name."
@@ -72,6 +73,15 @@ RZNode >> seedsFromConfiguration: aString [
 ]
 
 { #category : '*Rhizome-Discovery' }
+RZNode >> servicesOfMember: aGossipEndpoint [
+	"What another node offers, as name -> endpoint, or empty while nothing has been
+	heard from it. The reading belongs to the discovery, which is also where asking
+	the other way round lives - RZDiscovery>>membersOffering:."
+
+	^ self discovery servicesOf: aGossipEndpoint
+]
+
+{ #category : '*Rhizome-Discovery' }
 RZNode >> startGossiping [
 	gossiper start
 ]
@@ -82,15 +92,51 @@ RZNode >> stopGossiping [
 ]
 
 { #category : '*Rhizome-Discovery' }
-RZNode class >> typeKey [
-	^ 'type'
+RZNode class >> isServiceKey: aString [
+	^ aString beginsWith: self servicePrefix
 ]
 
 { #category : '*Rhizome-Discovery' }
-RZNode >> typeOfMember: aGossipEndpoint [
-	"What another node says it is, or nil while nothing has been heard from it.
-	The reading itself belongs to the discovery, which is also where asking the
-	other way round lives - RZDiscovery>>membersOfType:."
+RZNode class >> knownServices [
+	"The names in use, and the vocabulary is not new: ApptiveGridService>>componentName
+	has been answering 'apptive-base' and 'apptive-account' all along, and the internal
+	proxy tells components apart by exactly those. 'apptive-scheduler' joins them - it
+	was never one of the four kinds a node could be, which is why the scheduler image
+	has been announcing itself as a metabase and saying nothing about the scheduler.
 
-	^ self discovery typeOf: aGossipEndpoint
+	'replication' is Rhizome's own, not an apptive component: it is what serves
+	/cluster and /ws. Hence no prefix on it.
+
+	And a node that offers none is a real case, not a gap: Rhizome decisions of
+	2026-09-22 named #lurker for a laptop taking part without taking on work, and
+	since 2026-09-25 that laptop is a GossipObserver, which publishes nothing. In
+	this shape it needs no name of its own - it is the empty set of services.
+
+	Not enforced. A name that is not here travels rather than being refused, the same
+	way a wrong type used to."
+
+	^ #( 'apptive-base' 'apptive-account' 'apptive-metabase' 'apptive-scheduler'
+	     'replication' )
+]
+
+{ #category : '*Rhizome-Discovery' }
+RZNode class >> serviceKeyFor: aServiceName [
+	^ self servicePrefix , aServiceName
+]
+
+{ #category : '*Rhizome-Discovery' }
+RZNode class >> serviceNameFrom: aKey [
+	^ aKey allButFirst: self servicePrefix size
+]
+
+{ #category : '*Rhizome-Discovery' }
+RZNode class >> servicePrefix [
+	"The namespace services are published under, so that reading them back is a
+	convention of the discovery rather than a string comparison scattered about.
+
+	It lives here and not in Gossip: Gossip names Rhizome nowhere and must not - what
+	a service is, is not part of a gossip protocol. This sits beside the other things
+	the discovery layer puts into a gossip state."
+
+	^ 'service.'
 ]

@@ -21,7 +21,7 @@ RZNodeDiscoveryTest >> setUp [
 	host := RZLocalHost name: #node1 address: '127.0.0.1'.
 	node := RZLocalNode port: 4850.
 	host addNode: node.
-	node type: #base.
+	node offers: 'apptive-base' at: '10.10.0.6:3601'.
 	gossiper := Gossiper new port: 9001; yourself.
 	node gossiper: gossiper.
 	"A gossiper knows nobody, not even itself, until it first touches its own state."
@@ -38,18 +38,24 @@ RZNodeDiscoveryTest >> testASeedListMayContainTheNodeItself [
 ]
 
 { #category : 'tests' }
-RZNodeDiscoveryTest >> testAnnouncesItsType [
-	node announceType.
-	self assert: (gossiper stateAt: RZNode typeKey) equals: #base
+RZNodeDiscoveryTest >> testAnnouncesWhereItsServiceIs [
+	"The value is the endpoint the service answers at, not the gossip endpoint. The
+	two coincide only where a deployment makes them."
+
+	node announceServices.
+	self
+		assert: (gossiper stateAt: (RZNode serviceKeyFor: 'apptive-base'))
+		equals: '10.10.0.6:3601'
 ]
 
 { #category : 'tests' }
-RZNodeDiscoveryTest >> testAnnouncesNothingBesidesItsType [
-	"Stage one carries the type and nothing else - no stage, no version, no capability."
-	node announceType.
+RZNodeDiscoveryTest >> testAnnouncesNothingBesidesItsServices [
+	"One key per service and nothing else - no stage, no version, no capability."
+
+	node announceServices.
 	self
 		assert: gossiper localEndpointState allStates applicationStates keys asArray
-		equals: (Array with: RZNode typeKey)
+		equals: (Array with: (RZNode serviceKeyFor: 'apptive-base'))
 ]
 
 { #category : 'tests' }
@@ -103,14 +109,21 @@ RZNodeDiscoveryTest >> testReadsASeedListFromConfiguration [
 ]
 
 { #category : 'tests' }
-RZNodeDiscoveryTest >> testReadsTheTypeAnotherNodeAnnounced [
+RZNodeDiscoveryTest >> testReadsTheServicesAnotherNodeAnnounced [
+	"Never heard of, heard of but silent, and heard of with a service - three
+	answers, and the first two are the same empty one."
+
 	| other state |
 	other := GossipEndpoint address: (NetNameResolver addressForName: '127.0.0.2') port: 9001.
-	self assert: (node typeOfMember: other) isNil.
+	self assertEmpty: (node servicesOfMember: other).
 	state := gossiper endpoints newEndpointStateFor: other.
-	self assert: (node typeOfMember: other) isNil.
-	state applicationStateAt: RZNode typeKey put: #metabase.
-	self assert: (node typeOfMember: other) equals: #metabase
+	self assertEmpty: (node servicesOfMember: other).
+	state
+		applicationStateAt: (RZNode serviceKeyFor: 'apptive-metabase')
+		put: '10.10.0.7:3800'.
+	self
+		assert: ((node servicesOfMember: other) at: 'apptive-metabase')
+		equals: '10.10.0.7:3800'
 ]
 
 { #category : 'tests' }
