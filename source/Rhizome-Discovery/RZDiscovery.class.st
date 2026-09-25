@@ -84,7 +84,13 @@ RZDiscovery >> membersWithDatabaseOpen: anId [
 	A hint, and deliberately not more. Where a database *belongs* is not answered
 	here - rendezvous hashing gives the candidates and the ownership record gives
 	the truth, and that stays the only authority. What this answers is who has it
-	open at the moment, which is a different question and an operational one."
+	open at the moment, which is a different question and an operational one.
+
+	*More than one answer is an anomaly.* A database has one writer and the lock is
+	exclusive, so two images holding the same one open is not a state the system is
+	supposed to reach. This says so rather than balancing over them - being able to
+	name both is the point, because a stale lock or an image that did not let go is
+	exactly what one would want to see here."
 
 	^ self members select: [ :each |
 		  (self openDatabasesOf: each) includes: anId ]

@@ -169,10 +169,15 @@ RZDiscoveryTest >> testTheDatabasesOfAMemberAreWhatItSaid [
 ]
 
 { #category : 'tests' }
-RZDiscoveryTest >> testTwoMembersCanHoldTheSameDatabaseOpen [
-	"Which is a real state and not a fault: a replica is open on more than one image
-	by design. Who may write to it is the ownership record's answer, not this one -
-	see RZDiscovery>>membersWithDatabaseOpen:."
+RZDiscoveryTest >> testTwoMembersOnOneDatabaseIsAnswerable [
+	"Two images holding one database open is **not** a normal state (Norbert,
+	2026-09-25) - a database has one writer and the lock is exclusive. The answer
+	has to be able to name both anyway, because that is the case worth seeing: a
+	stale lock, an image that did not let go, two that believe they are primary.
+
+	So this is not a feature of the model being exercised, it is an anomaly being
+	made visible. Whoever reads this answer and finds two should treat it as a
+	finding, not as a load-balancing opportunity."
 
 	self member: (self otherOn: 9002) hasOpen: #( 'aaa' 'bbb' ).
 	self member: (self otherOn: 9003) hasOpen: #( 'bbb' ).
